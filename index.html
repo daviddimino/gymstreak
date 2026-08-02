@@ -61,7 +61,6 @@
     box-shadow:0 0 0 11px #131316, 0 0 0 12px #29292e, 0 40px 90px -30px rgba(0,0,0,.9);
     overflow:hidden;
   }
-  .phone.light{background:#F4F5F7}
   .island{
     position:absolute;top:11px;left:50%;transform:translateX(-50%);
     width:118px;height:35px;background:#000;border-radius:20px;z-index:60;
@@ -73,7 +72,6 @@
     font-variant-numeric:tabular-nums;pointer-events:none;
   }
   .status .rt{display:flex;gap:7px;align-items:center}
-  .light .status{color:#0B0B0D}
   .status svg{display:block}
 
   /* ---------- viewport / screens ---------- */
@@ -111,7 +109,6 @@
 
   /* ---------- cards ---------- */
   .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
-  .light .card{background:#FFF;border-color:#E7E8EC}
   .row{display:flex;align-items:center;gap:12px}
   .between{display:flex;align-items:center;justify-content:space-between}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -147,11 +144,9 @@
     display:flex;align-items:flex-start;padding:12px 14px 0;
     border-top:1px solid var(--line);backdrop-filter:blur(12px);
   }
-  .light .tabbar{background:linear-gradient(to top,rgba(244,245,247,.98) 55%,rgba(244,245,247,0));border-color:#E2E3E7}
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;
     color:var(--t3);font-size:10.5px;font-weight:600;cursor:pointer;padding-top:4px}
   .tab.on{color:var(--lime)}
-  .light .tab{color:#9A9BA2}.light .tab.on{color:#0B0B0D}
   .tab svg{width:24px;height:24px}
 
   /* ---------- week strip ---------- */
@@ -172,7 +167,6 @@
     display:grid;place-items:center;color:var(--t1);cursor:pointer;position:relative}
   .iconbtn svg{width:21px;height:21px}
   .dot-badge{position:absolute;top:9px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--lime);border:2px solid var(--card)}
-  .light .iconbtn{background:#fff;border-color:#E2E3E7;color:#0B0B0D}
   /* streak hero */
   .week-box{flex:none;text-align:center;border:1.5px solid var(--lime);border-radius:18px;padding:14px 18px;
     background:rgba(212,255,63,.06)}
@@ -261,9 +255,6 @@
   .gymrow.hidden{display:none}
   .gym-empty{text-align:center;color:var(--t2);padding:34px 20px;font-size:13.5px;line-height:1.5}
   .gym-empty b{color:var(--t1);display:block;margin-bottom:6px;font-size:15px}
-  .light .ob-head,.light .ob-foot{background:#F4F5F7}
-  .light .searchbar{background:#fff;border-color:#E4E5E9}
-  .light .gymrow{background:#fff;border-color:#E7E8EC}
   /* controls row: multi-select toggle + map button */
   .ob-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
   .multi-toggle{display:flex;align-items:center;gap:11px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--t2)}
@@ -301,15 +292,6 @@
   .obm-foot .cnt{flex:1;font-size:14px;color:var(--t2);font-weight:600}
   .obm-foot .cnt b{color:var(--t1)}
   .backbtn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;color:var(--t1)}
-  .light .h1,.light .stat-num{color:#0B0B0D}
-  .light .wordmark,.light .rank .nm b,.light .rank .val,.light .day.hit .lab{color:#0B0B0D}
-  .light .eyebrow{color:#8A8B92}.light .sub,.light .muted{color:#55565E}
-  .light .backbtn{background:#fff;border-color:#E2E3E7;color:#0B0B0D}
-  .light .day .cell{border-color:#E4E5E9}
-  .light .day.hit .cell{background:var(--lime);border-color:var(--lime)}
-  .light .seg{background:#EDEEF1;border-color:#E2E3E7}.light .seg button{color:#6B6C73}
-  .light .chip{background:#fff;border-color:#E4E5E9;color:#55565E}
-  .light .rank.me{background:rgba(212,255,63,.16);border-color:rgba(120,140,20,.4)}
 
   /* ---------- frozen app header + scrollable body (tab screens) ---------- */
   .scr-head{flex:none;background:var(--bg);padding:var(--top-inset) 20px 12px;z-index:8;
@@ -318,18 +300,16 @@
   .scr-body{flex:1;min-height:0;overflow-y:auto;padding:10px 20px 22px}
   .scr-body::-webkit-scrollbar{width:0}
   .has-tab .scr-body{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
-  .light .scr-head{background:#F4F5F7}
   /* profile avatar button (top-right → profile) */
   .pfp{flex:none;padding:0;border:none;background:none;cursor:pointer;border-radius:50%;line-height:0}
   .pfp .av{box-shadow:0 0 0 2px var(--line2)}
-  .light .pfp .av{box-shadow:0 0 0 2px #E2E3E7}
 
   /* ---------- slide-in menu drawer ---------- */
   .menu-wrap{position:absolute;inset:0;z-index:180;pointer-events:none}
   .menu-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;transition:opacity .25s}
-  .menu-panel{position:absolute;top:0;right:0;bottom:0;width:85%;max-width:340px;background:var(--card);
-    border-left:1px solid var(--line);display:flex;flex-direction:column;
-    transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+  .menu-panel{position:absolute;top:0;left:0;bottom:0;width:85%;max-width:340px;background:var(--card);
+    border-right:1px solid var(--line);display:flex;flex-direction:column;
+    transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
   .menu-wrap.open{pointer-events:auto}
   .menu-wrap.open .menu-backdrop{opacity:1}
   .menu-wrap.open .menu-panel{transform:none}
@@ -356,24 +336,6 @@
   #toast.show{opacity:1;transform:translateX(-50%)}
 
   /* ---------- app-wide light theme (base + surfaces that need explicit fixes) ---------- */
-  .phone.light{color:#15161B;--bg:#F4F5F7;--card:#FFFFFF}
-  .light .btn-ghost{color:#15161B;border-color:#D8DAE0}
-  .light .btn-dark{background:#fff;border-color:#E4E5E9;color:#15161B}
-  .light .pill{background:#EDEEF1;color:#55565E}
-  .light .pill-live{background:rgba(150,180,20,.16);color:#4c5a10}
-  .light .reactbtn{background:#fff;border-color:#E4E5E9;color:#55565E}
-  .light .divider{background:#E7E8EC}
-  .light .sw{background:#DCDEE3;border-color:#CFD1D7}
-  .light .heat i{background:#E9EAEE}
-  .light .rank .nm span{color:#8A8B92}
-  .light .menu-panel{background:#fff;border-color:#E7E8EC}
-  .light .menu-notif{background:#F4F5F7;border-color:#E7E8EC}
-  .light .menu-item:active{background:#F0F1F4}
-  .light #toast{background:#1b1c22;color:#fff;border-color:#1b1c22}
-  .light .pod .plat{background:#fff;border-color:#E7E8EC}
-  .light .pod.p1 .plat{background:linear-gradient(180deg,rgba(212,255,63,.22),rgba(212,255,63,.05));border-color:rgba(150,180,20,.5)}
-  .light .pod .pv{color:#15161B}
-  .light .reactbtn.reacted{background:rgba(212,255,63,.2);border-color:rgba(150,180,20,.5);color:#4c5a10}
 
   /* ---------- floating dock ---------- */
   .dock{
@@ -659,13 +621,7 @@ function rankRow(pos,key,name,val,trend,medal,me){
 }
 S.home=()=>`
 <div class="scr-head" id="homeHead">
-  <div class="between">
-    <div class="row" style="gap:11px">
-      <div class="logo-mark">${I.bolt}</div>
-      <span class="wordmark">GymStreak</span>
-    </div>
-    ${hdrActions()}
-  </div>
+  ${appHeader('<div class="logo-mark">'+I.bolt+'</div><span class="wordmark">GymStreak</span>')}
 </div>
 <div class="scr-body" onscroll="onScrollHead(this)">${homeBody()}</div>
 ${tabbar('home')}`;
@@ -782,10 +738,7 @@ function lbRow(pos,f,disp){
 }
 S.board=()=>`
 <div class="scr-head">
-  <div class="between" style="margin-bottom:14px">
-    <div class="h1" style="font-size:24px">Leaderboard</div>
-    ${hdrActions()}
-  </div>
+  ${appHeader('<div class="h1" style="font-size:24px">Leaderboard</div>','14px')}
   <div class="seg" id="lbSeg" style="margin-bottom:12px">
     ${LB_PERIODS.map(p=>`<button data-p="${p[0]}" onclick="setLbPeriod('${p[0]}')">${p[1]}</button>`).join('')}
   </div>
@@ -802,7 +755,7 @@ ${tabbar('board')}`;
 /* Leaderboard EMPTY (reachable via dock) */
 S.boardEmpty=()=>`
 <div class="scr-head">
-  <div class="between"><div class="h1" style="font-size:24px">Leaderboard</div>${hdrActions()}</div>
+  ${appHeader('<div class="h1" style="font-size:24px">Leaderboard</div>')}
 </div>
 <div class="scr-body">
   <div class="empty" style="margin-top:50px">
@@ -859,8 +812,7 @@ S.fprofile=()=>`
 /* 7. FRIENDS */
 S.friends=()=>`
 <div class="scr-head">
-  <div class="between" style="margin-bottom:14px"><div class="h1" style="font-size:24px">Friends</div>
-    ${hdrActions()}</div>
+  ${appHeader('<div class="h1" style="font-size:24px">Friends</div>','14px')}
   <label class="searchbar" style="margin-top:0">${I.search}<input type="text" inputmode="search" placeholder="Search by @username" autocomplete="off"></label>
 </div>
 <div class="scr-body" onscroll="onScrollHead(this)">
@@ -890,7 +842,7 @@ function friendRow(f){
 }
 S.friendsEmpty=()=>`
 <div class="scroll">
-  <div class="between" style="margin-bottom:20px"><div class="h1" style="font-size:24px">Friends</div>${hdrActions()}</div>
+  ${appHeader('<div class="h1" style="font-size:24px">Friends</div>','20px')}
   <div class="empty" style="margin-top:50px">
     <div class="ico" style="color:var(--lime)">${I.friends}</div>
     <div><div style="font-weight:700;font-size:17px;color:var(--t1)">Working out is better together</div>
@@ -912,8 +864,7 @@ const FEED=[
 ];
 S.feed=()=>`
 <div class="scr-head">
-  <div class="between"><div class="h1" style="font-size:24px">Activity</div>
-    ${hdrActions()}</div>
+  ${appHeader('<div class="h1" style="font-size:24px">Activity</div>')}
 </div>
 <div class="scr-body" onscroll="onScrollHead(this)">
   <div style="display:flex;flex-direction:column;gap:12px">
@@ -1005,7 +956,6 @@ const SCREENS=[
   ['boardEmpty','Empty · Board',false],
   ['friendsEmpty','Empty · Friends',false],
 ];
-let lightMode=false;
 const vp=document.getElementById('viewport');
 const dock=document.getElementById('dock');
 const phone=document.getElementById('phone');
@@ -1027,10 +977,10 @@ function cycleDevBadge(){ devCorner=(devCorner+1)%DEV_CORNERS.length; setDevBadg
 let profileReturn='home';
 function openProfile(){ if(current!=='profile') profileReturn=current; go('profile'); }
 const pfpBtn=()=>`<button class="pfp" onclick="openProfile()" title="Your profile">${avatar('you',38)}</button>`;
-/* consistent top-right cluster for every main screen: menu · light/dark · profile */
-const hdrActions=()=>`<div class="row" style="gap:8px">
-  <button class="iconbtn" onclick="openMenu()" title="Menu">${I.menu}</button>
-  <button class="themebtn iconbtn" title="Light / dark mode">☾</button>
+/* consistent app header: hamburger (top-left) · title · profile avatar (right) */
+const menuBtn=()=>`<button class="iconbtn" onclick="openMenu()" title="Menu">${I.menu}</button>`;
+const appHeader=(leftInner,mb='0')=>`<div class="between" style="margin-bottom:${mb}">
+  <div class="row" style="gap:12px;min-width:0">${menuBtn()}${leftInner}</div>
   ${pfpBtn()}
 </div>`;
 
@@ -1087,11 +1037,7 @@ function go(id){
   current=id;
   const hasTab=['home','board','feed','friends','boardEmpty','friendsEmpty'].includes(id);
   vp.innerHTML=`<div class="screen active ${hasTab?'has-tab':''}">${S[id]()}</div>`;
-  phone.classList.toggle('light', lightMode);
   document.querySelectorAll('#dock button').forEach(b=>b.classList.toggle('on',b.dataset.s===id));
-  // wire theme button (re-renders current screen so the toggle works on every tab)
-  const tb=vp.querySelector('.themebtn');
-  if(tb){tb.textContent=lightMode?'☀':'☾';tb.onclick=()=>{lightMode=!lightMode;go(current);};}
   wireGym();
   if(id==='board') renderBoard();
   vp.querySelector('.scroll')?.scrollTo(0,0);
