@@ -324,6 +324,57 @@
   .pfp .av{box-shadow:0 0 0 2px var(--line2)}
   .light .pfp .av{box-shadow:0 0 0 2px #E2E3E7}
 
+  /* ---------- slide-in menu drawer ---------- */
+  .menu-wrap{position:absolute;inset:0;z-index:180;pointer-events:none}
+  .menu-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;transition:opacity .25s}
+  .menu-panel{position:absolute;top:0;right:0;bottom:0;width:85%;max-width:340px;background:var(--card);
+    border-left:1px solid var(--line);display:flex;flex-direction:column;
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+  .menu-wrap.open{pointer-events:auto}
+  .menu-wrap.open .menu-backdrop{opacity:1}
+  .menu-wrap.open .menu-panel{transform:none}
+  .menu-head{flex:none;display:flex;align-items:center;gap:10px;padding:var(--top-inset) 16px 14px;border-bottom:1px solid var(--line)}
+  .menu-me{flex:1;display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;text-align:left;padding:0;min-width:0;color:inherit}
+  .menu-scroll{flex:1;overflow-y:auto;padding:16px 18px calc(24px + env(safe-area-inset-bottom,0px))}
+  .menu-scroll::-webkit-scrollbar{width:0}
+  .menu-notif{display:flex;gap:11px;align-items:flex-start;background:var(--raise);border:1px solid var(--line);border-radius:13px;padding:11px 12px}
+  .menu-notif .ni{font-size:17px;flex:none}
+  .menu-notif b{display:block;font-size:13.5px;font-weight:700}
+  .menu-notif span{font-size:12px;color:var(--t2)}
+  .menu-list{display:flex;flex-direction:column;gap:2px}
+  .menu-item{display:flex;align-items:center;gap:13px;width:100%;background:none;border:none;cursor:pointer;
+    padding:13px 6px;text-align:left;border-radius:10px;color:inherit}
+  .menu-item:active{background:var(--raise)}
+  .menu-item .mi-ico{font-size:19px;width:24px;text-align:center;flex:none}
+  .menu-item .mi-txt{flex:1;min-width:0}
+  .menu-item .mi-txt b{display:block;font-size:15px;font-weight:600}
+  .menu-item .mi-txt span{font-size:12px;color:var(--t2)}
+  .menu-item svg{color:var(--t3);flex:none}
+  #toast{position:absolute;bottom:120px;left:50%;transform:translateX(-50%) translateY(8px);z-index:400;
+    background:var(--raise2);color:var(--t1);border:1px solid var(--line2);padding:11px 17px;border-radius:12px;
+    font-size:13px;font-weight:600;max-width:80%;text-align:center;opacity:0;pointer-events:none;transition:.2s}
+  #toast.show{opacity:1;transform:translateX(-50%)}
+
+  /* ---------- app-wide light theme (base + surfaces that need explicit fixes) ---------- */
+  .phone.light{color:#15161B;--bg:#F4F5F7;--card:#FFFFFF}
+  .light .btn-ghost{color:#15161B;border-color:#D8DAE0}
+  .light .btn-dark{background:#fff;border-color:#E4E5E9;color:#15161B}
+  .light .pill{background:#EDEEF1;color:#55565E}
+  .light .pill-live{background:rgba(150,180,20,.16);color:#4c5a10}
+  .light .reactbtn{background:#fff;border-color:#E4E5E9;color:#55565E}
+  .light .divider{background:#E7E8EC}
+  .light .sw{background:#DCDEE3;border-color:#CFD1D7}
+  .light .heat i{background:#E9EAEE}
+  .light .rank .nm span{color:#8A8B92}
+  .light .menu-panel{background:#fff;border-color:#E7E8EC}
+  .light .menu-notif{background:#F4F5F7;border-color:#E7E8EC}
+  .light .menu-item:active{background:#F0F1F4}
+  .light #toast{background:#1b1c22;color:#fff;border-color:#1b1c22}
+  .light .pod .plat{background:#fff;border-color:#E7E8EC}
+  .light .pod.p1 .plat{background:linear-gradient(180deg,rgba(212,255,63,.22),rgba(212,255,63,.05));border-color:rgba(150,180,20,.5)}
+  .light .pod .pv{color:#15161B}
+  .light .reactbtn.reacted{background:rgba(212,255,63,.2);border-color:rgba(150,180,20,.5);color:#4c5a10}
+
   /* ---------- floating dock ---------- */
   .dock{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;
@@ -385,6 +436,7 @@
   </div>
 
   <div class="viewport" id="viewport"><!-- screens injected --></div>
+  <div id="menuSheet" class="menu-wrap"><!-- menu drawer injected --></div>
   <div id="devBadge" onclick="cycleDevBadge()" title="Dev: current screen — tap to move"></div>
 </div>
 
@@ -417,6 +469,7 @@ const I={
   share:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 15V3m0 0L8 7m4-4 4 4" stroke="#0B0B0D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" stroke="#0B0B0D" stroke-width="2" stroke-linecap="round"/></svg>',
   plus:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
   bell:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  menu:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
 };
 /* mini map thumbnail (procedural, self-rounding, fills its container) */
 function mapThumb(seed){
@@ -611,11 +664,7 @@ S.home=()=>`
       <div class="logo-mark">${I.bolt}</div>
       <span class="wordmark">GymStreak</span>
     </div>
-    <div class="row" style="gap:8px">
-      <button class="themebtn iconbtn" title="Toggle light / dark">☾</button>
-      <button class="iconbtn" title="Notifications">${I.bell}<span class="dot-badge"></span></button>
-      ${pfpBtn()}
-    </div>
+    ${hdrActions()}
   </div>
 </div>
 <div class="scr-body" onscroll="onScrollHead(this)">${homeBody()}</div>
@@ -735,7 +784,7 @@ S.board=()=>`
 <div class="scr-head">
   <div class="between" style="margin-bottom:14px">
     <div class="h1" style="font-size:24px">Leaderboard</div>
-    ${pfpBtn()}
+    ${hdrActions()}
   </div>
   <div class="seg" id="lbSeg" style="margin-bottom:12px">
     ${LB_PERIODS.map(p=>`<button data-p="${p[0]}" onclick="setLbPeriod('${p[0]}')">${p[1]}</button>`).join('')}
@@ -753,7 +802,7 @@ ${tabbar('board')}`;
 /* Leaderboard EMPTY (reachable via dock) */
 S.boardEmpty=()=>`
 <div class="scr-head">
-  <div class="between"><div class="h1" style="font-size:24px">Leaderboard</div>${pfpBtn()}</div>
+  <div class="between"><div class="h1" style="font-size:24px">Leaderboard</div>${hdrActions()}</div>
 </div>
 <div class="scr-body">
   <div class="empty" style="margin-top:50px">
@@ -811,7 +860,7 @@ S.fprofile=()=>`
 S.friends=()=>`
 <div class="scr-head">
   <div class="between" style="margin-bottom:14px"><div class="h1" style="font-size:24px">Friends</div>
-    <div class="row" style="gap:8px"><button class="iconbtn" style="color:var(--lime)" title="Add friend">${I.plus}</button>${pfpBtn()}</div></div>
+    ${hdrActions()}</div>
   <label class="searchbar" style="margin-top:0">${I.search}<input type="text" inputmode="search" placeholder="Search by @username" autocomplete="off"></label>
 </div>
 <div class="scr-body" onscroll="onScrollHead(this)">
@@ -841,7 +890,7 @@ function friendRow(f){
 }
 S.friendsEmpty=()=>`
 <div class="scroll">
-  <div class="between" style="margin-bottom:20px"><div class="h1" style="font-size:24px">Friends</div>${pfpBtn()}</div>
+  <div class="between" style="margin-bottom:20px"><div class="h1" style="font-size:24px">Friends</div>${hdrActions()}</div>
   <div class="empty" style="margin-top:50px">
     <div class="ico" style="color:var(--lime)">${I.friends}</div>
     <div><div style="font-weight:700;font-size:17px;color:var(--t1)">Working out is better together</div>
@@ -864,7 +913,7 @@ const FEED=[
 S.feed=()=>`
 <div class="scr-head">
   <div class="between"><div class="h1" style="font-size:24px">Activity</div>
-    <div class="row" style="gap:10px"><div class="pill pill-live"><span class="dotlive"></span>2 live</div>${pfpBtn()}</div></div>
+    ${hdrActions()}</div>
 </div>
 <div class="scr-body" onscroll="onScrollHead(this)">
   <div style="display:flex;flex-direction:column;gap:12px">
@@ -978,17 +1027,71 @@ function cycleDevBadge(){ devCorner=(devCorner+1)%DEV_CORNERS.length; setDevBadg
 let profileReturn='home';
 function openProfile(){ if(current!=='profile') profileReturn=current; go('profile'); }
 const pfpBtn=()=>`<button class="pfp" onclick="openProfile()" title="Your profile">${avatar('you',38)}</button>`;
+/* consistent top-right cluster for every main screen: menu · light/dark · profile */
+const hdrActions=()=>`<div class="row" style="gap:8px">
+  <button class="iconbtn" onclick="openMenu()" title="Menu">${I.menu}</button>
+  <button class="themebtn iconbtn" title="Light / dark mode">☾</button>
+  ${pfpBtn()}
+</div>`;
+
+/* ---- slide-in menu drawer ---- */
+function openMenu(){ document.getElementById('menuSheet').classList.add('open'); }
+function closeMenu(){ document.getElementById('menuSheet').classList.remove('open'); }
+function toast(msg){
+  let t=document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast'; phone.appendChild(t); }
+  t.textContent=msg; t.classList.add('show'); clearTimeout(t._h);
+  t._h=setTimeout(()=>t.classList.remove('show'),1600);
+}
+function menuHTML(){
+  const notifs=[
+    ['👋','Maya nudged you','“Get to the gym!” · 12m'],
+    ['📉','Jordan passed you','Now #1 this week · 1h'],
+    ['🔥','7 days to a new record','Keep your 14-day streak alive · 3h'],
+    ['🎉','Devon hit an 18-day streak','React in the feed · 5h'],
+  ];
+  const items=[
+    ['🏆','This week’s challenge','Most sessions · you’re 2nd',"closeMenu();toast('Challenge: most sessions — you’re 2nd')"],
+    ['🎖️','Achievements','12 badges earned',"closeMenu();toast('12 badges earned')"],
+    ['➕','Invite friends','',"closeMenu();go('friends')"],
+    ['⚙️','Settings & privacy','',"closeMenu();openProfile()"],
+    ['❓','Help & support','',"closeMenu();toast('Help & support')"],
+  ];
+  return `
+  <div class="menu-backdrop" onclick="closeMenu()"></div>
+  <div class="menu-panel">
+    <div class="menu-head">
+      <button class="menu-me" onclick="closeMenu();openProfile()">
+        ${avatar('you',46)}
+        <div><div style="font-family:var(--stat);font-weight:800;font-size:16px">David DiMino</div>
+          <div class="muted tny">🔥 14-day streak · View profile</div></div>
+      </button>
+      <button class="iconbtn" onclick="closeMenu()" title="Close">✕</button>
+    </div>
+    <div class="menu-scroll">
+      <div class="between" style="margin:2px 0 10px"><div class="eyebrow">Notifications</div><span class="muted tny" style="color:var(--lime);font-weight:700">4 new</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
+        ${notifs.map(n=>`<div class="menu-notif"><span class="ni">${n[0]}</span><div><b>${n[1]}</b><span>${n[2]}</span></div></div>`).join('')}
+      </div>
+      <div class="eyebrow" style="margin-bottom:8px">Menu</div>
+      <div class="menu-list">
+        ${items.map(it=>`<button class="menu-item" onclick="${it[3]}"><span class="mi-ico">${it[0]}</span><div class="mi-txt"><b>${it[1]}</b>${it[2]?`<span>${it[2]}</span>`:''}</div>${I.chev}</button>`).join('')}
+      </div>
+      <button class="btn btn-dark" style="margin-top:22px" onclick="closeMenu();toast('Signed out')">Sign out</button>
+      <p class="muted tny" style="text-align:center;margin-top:14px">GymStreak v1.0</p>
+    </div>
+  </div>`;
+}
 
 function go(id){
   current=id;
   const hasTab=['home','board','feed','friends','boardEmpty','friendsEmpty'].includes(id);
   vp.innerHTML=`<div class="screen active ${hasTab?'has-tab':''}">${S[id]()}</div>`;
-  // light theme only meaningful on home
-  phone.classList.toggle('light', lightMode && id==='home');
+  phone.classList.toggle('light', lightMode);
   document.querySelectorAll('#dock button').forEach(b=>b.classList.toggle('on',b.dataset.s===id));
-  // wire theme button + gym select if present
+  // wire theme button (re-renders current screen so the toggle works on every tab)
   const tb=vp.querySelector('.themebtn');
-  if(tb){tb.textContent=lightMode?'☀':'☾';tb.onclick=()=>{lightMode=!lightMode;go('home');};}
+  if(tb){tb.textContent=lightMode?'☀':'☾';tb.onclick=()=>{lightMode=!lightMode;go(current);};}
   wireGym();
   if(id==='board') renderBoard();
   vp.querySelector('.scroll')?.scrollTo(0,0);
@@ -1045,6 +1148,7 @@ function nudge(btn){btn.textContent='✓ Nudged Maya';btn.style.background='var(
 
 /* build dock */
 dock.innerHTML=SCREENS.map(s=>`<button data-s="${s[0]}" onclick="go('${s[0]}')">${s[1]}</button>`).join('');
+document.getElementById('menuSheet').innerHTML=menuHTML();
 
 /* reaction button style injected */
 const st=document.createElement('style');
