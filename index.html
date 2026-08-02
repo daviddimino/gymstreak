@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GymStreak">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkd5bVN0cmVhayIsICJzaG9ydF9uYW1lIjogIkd5bVN0cmVhayIsICJkZXNjcmlwdGlvbiI6ICJHeW0gYWNjb3VudGFiaWxpdHksIHdpdGggZnJpZW5kcy4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwgImJhY2tncm91bmRfY29sb3IiOiAiIzBCMEIwRCIsICJ0aGVtZV9jb2xvciI6ICIjMEIwQjBEIiwgInN0YXJ0X3VybCI6ICIuLyIsICJpY29ucyI6IFt7InNyYyI6ICJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQWdBQUFBSUFDQUlBQUFCN0drT3RBQUFLU1VsRVFWUjQydTNac2EzQ1FCUUZVZWNXRFZDQUN5QkhwSlRqSnR3SXBWQUQvZUNWU0IxQXloenBWR0I5N3VpL25lYjVCRURRNUJNQUNBQUFBZ0NBQUFBZ0FBQUlBQUFDQUlBQUFDQUFBQWdBQUFJQWdBQUFJQUFBQ0FBQUFnQ0FBQUFnQUFBSUFBQUNBSUFBQUNBQUFBZ0FBQUlBZ0FBQUNBQUFBZ0NBQUFBZ0FBQUlBQUFDQUlBQUFDQUFBQWdBQUFJQWdBQUFJQUFBQ0FBQUFnQ0FBQUFnQUFBSUFBQUNBSUFBQUNBQUFBZ0FBQUlBZ0FBQUNJQ3ZBQ0FBQUFnQUFBSUFnQUFBSUFBQUNBQUFBZ0NBQUFBZ0FBQUlBQUFDQUlBQUFDQUFBQWdBQUFJQWdBQUFJQUFBQ0FBQUFnQ0FBQUFnQUFBSUFBQUNBQ0FBQUFnQUFBSUFnQUFBSUFBQUNBQUFBZ0NBQUFBZ0FBQUlBQUFDQUlBQUFDQUFBQWdBQUFJQWdBQUFJQUFBQ0FBQUFnQ0FBQUFnQUFBSUFBQUNBQ0FBdmdLQUFBQWdBQUFJQVBDejYvMjhib3Z2Z0FCQXp1TjVFUUFFQUlyci8zcmZCQUFCZ056eFo2ei80Rk1nQUZCY2Z3RkFBS0I0L0JFQUJBQzY2eThBQ0FBVWp6OWVnQkVBaUs2L0FDQUFFRDMrQ0FBQ0FOSDFGd0FFQUlySEh5L0FDQUIwMTE4QUVBQW9IbjhFQUFHQTd2b0xBQUlBeGVPUEYyQUVBS0xyTHdBSUFFU1BQd0tBQUVCMC9RVUFBWURpOGNjTE1BSUEzZlVYQUFRQWlzY2ZBVUFBb0x2K0FvQUFRUEg0NHdVWUFZRG8rZ3NBQWdEUjQ0OEFJQUFRWFg4QlFBQ2dlUHp4QW93QVFIZjlCUUFCZ09MeFJ3QVFBT2l1dndBZ0FGQTgvbmdCUmdBZ3V2NENnQUJBOVBnakFBZ0FSTmRmQUJBQUtCNS92QUFqQU5CZGZ3RkFBS0I0L0JFQUJBQzY2eThBQ0FBVWp6OWVnQkVBaUs2L0FDQUFFRDMrQ0FBQ0FOSDFGd0FFQUlySEh5L0FDQUIwMTE4QUVBQW9IbjhFQUFHQTd2b0xBQUlBeGVPUEYyQUVBS0xyTHdBSUFFU1BQd0tBQUVCMC9RVUFBWURpOGNjTE1BSUEzZlVYQUFRQWlzY2ZBVUFBb0x2K0FvQUFRUEg0NHdVWUFZRG8rZ3NBQWdEUjQ0OEFJQUFRWFg4QlFBQ2dlUHp4QW93QVFIZjlCUUFCZ09MeFJ3QVFBT2l1dndBZ0FGQTgvbmdCUmdBZ3V2NENnQUJBOVBnakFBZ0FSTmRmQUJBQUtCNS92QUFqQU5CZGZ3RkFBS0I0L0JFQUJBQzY2eThBQ0FBVWp6OWVnQkVBaUs2L0FDQUFFRDMrQ0FBQ0FOSDFGd0FFQUlySEh5L0FDQUIwMTE4QUVBQW9IbjhFQUFHQTd2b0xBQUlBeGVPUEYyQUVBS0xyTHdBSUFFU1BQd0tBQUVCMC9RVUFBWURpOGNjTE1BSUEzZlVYQUFRQWlzY2ZBVUFBb0x2K0FvQUFRUEg0NHdVWUFZRG8rZ3NBQWdEUjQ0OEFJQUFRWFg4QlFBQ2dlUHp4QW93QVFIZjlCUUFCZ09MeFJ3QVFBT2l1dndBZ0FGQTgvbmdCUmdBZ3V2NENnQUJBOVBnakFBZ0FSTmRmQUJBQUtCNS92QUFqQU5CZGZ3RkFBS0I0L0JFQUJBQzY2eThBQ0FBVWp6OWVnQkVBaUs2L0FDQUFFRDMrQ0FBQ0FOSDFGd0FFQUlySEh5L0FDQUIwMTE4QUVBQW9IbjhFQUFHQTd2b0xBQUlBeGVPUEYyQUVBS0xyTHdBSUFFU1BQd0tBQUVCMC9RVUFBWURpOGNjTE1BSUEzZlVYQUFRQWlzY2ZBVUFBb0x2K0FvQUFRUEg0NHdVWUFZRG8rZ3NBQWdEUjQ0OEFJQUFRWFg4QlFBQ2dlUHp4QW93QVFIZjlCUUFCZ09MeFJ3QVFBT2l1LytjTmdFUGpIMEUvQndIQThZY2lBUkFBckQvV0h3SEE4WWVHOFpmZzV5QUFXSCtzUHdLQTR3K09Qd2dBMWgvcmp3RGcrSVBqRHdLQTljZjZJd0E0L3VENGd3QmcvYkgrQ0FDT1B6aitJQUJZZjZ3L0FvRGpENDQvQ0FEV0grdVBBT0Q0ZytNUEFvRDF4L29qQURqKzRQaURBR0Q5c2Y0SUFJNC9PUDRnQUZoL3JMOEFnT01Qamo4Q2dQVTNmRmgvQWNEeEI4Y2ZCQURyai9WSEFIRDh3ZkVIQWNENlkvMFJBQngvY1B4QkFMRCtXSDhFQU1jZkhIOFFBS3cvMWg4QndQRUh4eDhFQU91UDlVY0FjUHpCOFFjQndQcGovUkVBSEg5dy9FRUFzUDVZZndRQXh4OGNmeEFBckQvV0h3SEE4UWZISHdRQTY0LzFSd0J3L01IeEJ3R3cvbGgvdndnRXdQRUh4eDhRQU91UDlVY0FjUHpCOFFjQndQcGovUkVBSEg5dy9FRUFzUDVZZndRQXh4OGNmeEFBckQvV0h3SEE4UWZISHdRQTY0LzFSd0J3L01IeEJ3SEErbVA5RVFBY2YzRDhRUUN3L2xoL0JBREhIeHgvRUFDc1A5WWZBY0R4QjhjZkJBRHJqL1ZIQUJ4L2JCK09Qd2lBOWNmNmd3QkVBckJ1QzRjY2YwQUFpTEwrSUFBSWdPTVBDQUFDWVAxQkFQaHZrVGNBeHg4RUFJb0JzUDRJQUVRRDRQaURBRUF4QU5ZZkFZRGlDN0RqRHdJQXhRQllmd1FBb2dGdy9FRUFvQmdBNjQ4QVFQRUYyUEVIQVlCaUFLdy9BZ0RSQURqK0lBQlFESUQxUndDZytBTHMrSU1BUURFQTFoOEJnR2dBSEg4UUFDZ0d3UG9qQUZCOEFYYjhRUUNnR0FEcmp3QkFOQUNPUHdnQUZBTmcvUkVBS0w0QU8vNGdBRkFNZ1BWSEFDQWFBTWNmQkFDS0FiRCtDQUFVWDRBZGZ4QUFLQWJBK2lNQUVBMkE0dzhDQU1VQVdIOEVBSW92d0k0L0NBQVVBMkQ5RVFDSUJzRHhCd0dBWWdDc1B3SUF4UmRneHg4RUFJb0JzUDRJQUVRRDRQaURBRUF4QU5ZZkFZRGlDN0RqRHdJQXhRQllmd1FBb2dGdy9FRUFvQmdBNjQ4QVFQRUYyUEVIQVlCaUFLdy9BZ0RSQURqK0lBQlFESUQxUndDZytBTHMrSU1BUURFQTFoOEJnR2dBSEg4UUFDZ0d3UG9qQUZCOEFYYjhRUUNnR0FEcmp3QkFOQUNPUHdnQUZBTmcvUkVBS0w0QU8vNGdBRkFNZ1BWSEFDQWFBTWNmQkFDS0FiRCtDQUFVWDRBZGZ4QUFLQWJBK2lNQUVBMkE0dzhDQU1VQVdIOEVBSW92d0k0L0NBQVVBMkQ5RVFDSUJzRHhCd0dBWWdDc1B3SUF4UmRneHg4RUFJb0JzUDRJQUVRRDRQaURBRUF4QU5ZZkFZRGlDN0RqRHdJQXhRQllmd1FBb2dGdy9FRUFvQmdBNjQ4QVFQRUYyUEVIQVlCaUFLdy9BZ0RSQURqK0lBQlFESUQxUndDZytBTHMrSU1BUURFQTFoOEJnR2dBSEg4UUFDZ0d3UG9qQUZCOEFYYjhRUUNnR0FEcmp3RDRDa1FENFBpREFQZ0tGQU5nL1VFQUtMNEFPLzZBQUZBTWdQVUhBU0FhQU1jZkVBQ0tBYkQrSUFBVVg0QWRmMEFBS0FiQStvTUFFQTJBNHc4SUFNVUFXSDhRQUlvdndJNC9JQUFVQTJEOVFRQ0lCc0R4QndTQVlnQ3NQd2dBeFJkZ3h4OFFBSW9Cc1A0Z0FFUUQ0UGdEQWtBeEFOWWZCSURpQzdEakR3Z0F4UUJZZnhBQW9nRncvQUVCb0JnQTZ3OENRUEVGMlBFSEJJQmlBS3cvQ0FEUkFEaitnQUJRRElEMUJ3R2crQUxzK0FNQ1FERUExaDhFZ0dnQUhIOUFBQ2dHd1BxREFGQjhBWGI4QVFHZ0dBRHJEd0pBTkFDT1B5QUFGQU5nL1VFQUtMNEFPLzZBQUZBTWdQVUhBU0FhQU1jZkVBQ0tBYkQrSUFBVVg0QWRmMEFBS0FiQStvTUFFQTJBNHc4SUFBQUNBSUFBQUNBQUFBZ0FBQUlBZ0FBQUlBQUFBdUFUQUFnQUFBSUFnQUFBSUFBQUNBQUFBZ0NBQUFBZ0FBQUlBQUFDQUlBQUFDQUFBQWdBQUFJQWdBQUFJQUFBQ0FBQUFnQ0FBQUFnQUFBSUFBQUNBSUFBQUFnQUFBSUFnQUFBSUFBQUNBQUFBZ0NBQUFBZ0FBQUlBQUFDQUlBQUFDQUFBQWdBQUFJQWdBQUFJQUFBQ0FBQUFnQ0FBQUFnQUFBSUFBQUNBSUFBQUFpQXJ3QWdBQUFJQUFBQ0FJQUFBQ0FBQUFnQUFBSUFnQUFBSUFBQUNBQUFBZ0NBQUFBZ0FBQUlBQUFDQUlBQUFDQUFBQWdBQUFJQWdBQUFJQUFBQ0FBQUFnQWdBQUFJQUFBQ0FJQUFBQ0FBQUFnQUFBSUFnQUFBSUFBQUNBQUFBZ0NBQUFBZ0FBQUlBQUFDQUlBQUFDQUFBQWdBQUFJQXdOZDJNSDlkb3JYd3QvMEFBQUFBU1VWT1JLNUNZSUk9IiwgInNpemVzIjogIjUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9wbmciLCAicHVycG9zZSI6ICJhbnkgbWFza2FibGUifV19">
+<title>GymStreak</title>
+</head>
+<body>
+<style>
+  :root{
+    --bg:#0B0B0D; --card:#151518; --raise:#1C1C21; --raise2:#242429;
+    --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+    --lime:#D4FF3F; --lime-ink:#0B0B0D;
+    --t1:#F6F6F8; --t2:#9B9BA4; --t3:#66666E;
+    --up:#3BE384; --down:#FF5D63;
+    --gold:#F5C044; --silver:#C7CBD1; --bronze:#C98B54;
+    --stat:-apple-system,"SF Pro Display",system-ui,"Helvetica Neue",sans-serif;
+    --body:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
+    --r:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:var(--body); color:var(--t1);
+    background:
+      radial-gradient(120% 80% at 50% -10%, #17170c 0%, rgba(23,23,12,0) 46%),
+      radial-gradient(90% 60% at 50% 120%, #101014 0%, rgba(16,16,20,0) 55%),
+      #050506;
+    min-height:100%;
+    display:flex; flex-direction:column; align-items:center;
+    padding:36px 16px 130px;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--lime);color:#0B0B0D}
+
+  /* ---------- studio header ---------- */
+  .studio{width:100%;max-width:900px;text-align:center;margin-bottom:30px}
+  .studio .mark{
+    display:inline-flex;align-items:center;gap:9px;font-family:var(--stat);
+    font-weight:800;letter-spacing:-.04em;font-size:23px;
+  }
+  .studio .mark b{color:var(--lime)}
+  .studio .mark .dot{width:9px;height:9px;border-radius:50%;background:var(--lime);box-shadow:0 0 14px var(--lime)}
+  .studio p{color:var(--t2);font-size:13px;margin-top:9px;letter-spacing:.01em}
+
+  /* ---------- phone frame ---------- */
+  .phone{
+    width:390px;height:844px;position:relative;border-radius:52px;
+    background:var(--bg);
+    border:1px solid var(--line2);
+    box-shadow:0 0 0 11px #131316, 0 0 0 12px #29292e, 0 40px 90px -30px rgba(0,0,0,.9);
+    overflow:hidden;
+  }
+  .phone.light{background:#F4F5F7}
+  .island{
+    position:absolute;top:11px;left:50%;transform:translateX(-50%);
+    width:118px;height:35px;background:#000;border-radius:20px;z-index:60;
+  }
+  .status{
+    position:absolute;top:0;left:0;right:0;height:54px;z-index:55;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 30px 0;font-size:14px;font-weight:600;
+    font-variant-numeric:tabular-nums;pointer-events:none;
+  }
+  .status .rt{display:flex;gap:7px;align-items:center}
+  .light .status{color:#0B0B0D}
+  .status svg{display:block}
+
+  /* ---------- viewport / screens ---------- */
+  .viewport{position:absolute;inset:0;overflow:hidden}
+  .screen{
+    position:absolute;inset:0;display:none;flex-direction:column;
+    animation:fade .28s ease both;
+  }
+  .screen.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:64px 20px 22px}
+  .scroll::-webkit-scrollbar{width:0}
+  .has-tab .scroll{padding-bottom:104px}
+
+  /* ---------- typographic helpers ---------- */
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--t3);font-weight:700}
+  .h1{font-family:var(--stat);font-weight:800;letter-spacing:-.03em;font-size:28px;line-height:1.02}
+  .sub{color:var(--t2);font-size:14px;line-height:1.45}
+  .stat-num{font-family:var(--stat);font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:.92}
+  .muted{color:var(--t2)}
+  .tny{font-size:12px}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    height:56px;border-radius:16px;border:none;width:100%;cursor:pointer;
+    font-family:var(--body);font-weight:700;font-size:16px;letter-spacing:-.01em;
+  }
+  .btn-primary{background:var(--lime);color:var(--lime-ink);box-shadow:0 10px 30px -12px rgba(212,255,63,.6)}
+  .btn-primary:active{transform:translateY(1px)}
+  .btn-ghost{background:transparent;color:var(--t1);border:1px solid var(--line2)}
+  .btn-dark{background:var(--raise);color:var(--t1);border:1px solid var(--line)}
+  .btn-sm{height:40px;font-size:13.5px;border-radius:12px;width:auto;padding:0 16px;font-weight:600}
+
+  /* ---------- cards ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+  .light .card{background:#FFF;border-color:#E7E8EC}
+  .row{display:flex;align-items:center;gap:12px}
+  .between{display:flex;align-items:center;justify-content:space-between}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* ---------- avatar w/ live ring ---------- */
+  .av{position:relative;flex:none;border-radius:50%;display:grid;place-items:center;
+      font-family:var(--stat);font-weight:800;color:#0B0B0D;letter-spacing:-.02em}
+  .av.live::after{
+    content:"";position:absolute;inset:-4px;border-radius:50%;
+    border:2px solid var(--lime);animation:pulse 2s ease-out infinite;
+  }
+  .av .ping{position:absolute;right:-1px;bottom:-1px;width:13px;height:13px;border-radius:50%;
+    background:var(--lime);border:2.5px solid var(--card)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(212,255,63,.5)}70%{box-shadow:0 0 0 9px rgba(212,255,63,0)}100%{box-shadow:0 0 0 0 rgba(212,255,63,0)}}
+
+  /* ---------- chips ---------- */
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+  .chips::-webkit-scrollbar{height:0}
+  .chip{flex:none;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);
+    background:var(--card);color:var(--t2);font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer}
+  .chip.on{background:var(--lime);color:#0B0B0D;border-color:var(--lime)}
+
+  /* ---------- segmented ---------- */
+  .seg{display:flex;background:var(--raise);border:1px solid var(--line);border-radius:13px;padding:4px;gap:4px}
+  .seg button{flex:1;height:38px;border:none;background:transparent;color:var(--t2);font-family:var(--body);
+    font-weight:600;font-size:13.5px;border-radius:10px;cursor:pointer}
+  .seg button.on{background:var(--lime);color:#0B0B0D}
+
+  /* ---------- tab bar ---------- */
+  .tabbar{
+    position:absolute;left:0;right:0;bottom:0;height:88px;z-index:40;
+    background:linear-gradient(to top,rgba(11,11,13,.98) 55%,rgba(11,11,13,0));
+    display:flex;align-items:flex-start;padding:12px 14px 0;
+    border-top:1px solid var(--line);backdrop-filter:blur(12px);
+  }
+  .light .tabbar{background:linear-gradient(to top,rgba(244,245,247,.98) 55%,rgba(244,245,247,0));border-color:#E2E3E7}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;
+    color:var(--t3);font-size:10.5px;font-weight:600;cursor:pointer;padding-top:4px}
+  .tab.on{color:var(--lime)}
+  .light .tab{color:#9A9BA2}.light .tab.on{color:#0B0B0D}
+  .tab svg{width:24px;height:24px}
+
+  /* ---------- week strip ---------- */
+  .week{display:flex;justify-content:space-between;gap:6px}
+  .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .day .lab{font-size:11px;color:var(--t3);font-weight:600}
+  .day .cell{width:100%;aspect-ratio:1;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center}
+  .day.hit .cell{background:var(--lime);border-color:var(--lime)}
+  .day.today .cell{border-color:var(--lime);border-width:2px}
+  .day.hit .lab{color:var(--t1)}
+
+  /* ---------- rank row ---------- */
+  .rank{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:14px;border:1px solid transparent}
+  .rank .pos{width:22px;text-align:center;font-family:var(--stat);font-weight:800;font-size:16px;color:var(--t2);font-variant-numeric:tabular-nums}
+  .rank .nm{flex:1;min-width:0}
+  .rank .nm b{font-size:15px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rank .nm span{font-size:12px;color:var(--t3)}
+  .rank .val{font-family:var(--stat);font-weight:800;font-size:19px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .rank.me{background:rgba(212,255,63,.09);border-color:rgba(212,255,63,.35)}
+  .rank .trend{font-size:11px;font-weight:700;display:flex;align-items:center;gap:2px}
+  .up{color:var(--up)}.dn{color:var(--down)}
+
+  /* podium */
+  .podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;padding:6px 0 4px}
+  .pod{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1}
+  .pod .plat{width:100%;border-radius:14px 14px 0 0;border:1px solid var(--line);border-bottom:none;
+    background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:12px 6px;text-align:center}
+  .pod.p1 .plat{height:112px;background:linear-gradient(180deg,rgba(212,255,63,.16),rgba(212,255,63,.03));border-color:rgba(212,255,63,.4)}
+  .pod.p2 .plat{height:88px}.pod.p3 .plat{height:74px}
+  .pod .medal{font-family:var(--stat);font-weight:800;font-size:15px}
+  .pod .pv{font-family:var(--stat);font-weight:800;font-size:16px;letter-spacing:-.03em;margin-top:2px}
+  .pod .pn{font-size:12px;color:var(--t2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+  /* heatmap */
+  .heat{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;grid-auto-columns:1fr;gap:3px}
+  .heat i{aspect-ratio:1;border-radius:3px;background:var(--raise)}
+  .heat i.l1{background:rgba(212,255,63,.28)}
+  .heat i.l2{background:rgba(212,255,63,.55)}
+  .heat i.l3{background:var(--lime)}
+
+  /* toggle switch */
+  .sw{width:46px;height:28px;border-radius:999px;background:var(--raise2);border:1px solid var(--line);position:relative;cursor:pointer;flex:none;transition:.2s}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+  .sw.on{background:var(--lime);border-color:var(--lime)}
+  .sw.on::after{left:20px}
+
+  /* misc */
+  .divider{height:1px;background:var(--line);margin:4px 0}
+  .pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700}
+  .pill-live{background:rgba(212,255,63,.14);color:var(--lime)}
+  .flame{color:var(--lime)}
+  .empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:40px 24px;color:var(--t2)}
+  .empty .ico{width:66px;height:66px;border-radius:20px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+  .empty .ico svg{width:30px;height:30px}
+  .backbtn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;color:var(--t1)}
+  .light .h1,.light .stat-num{color:#0B0B0D}
+  .light .eyebrow{color:#8A8B92}.light .sub,.light .muted{color:#55565E}
+  .light .backbtn{background:#fff;border-color:#E2E3E7;color:#0B0B0D}
+  .light .day .cell{border-color:#E4E5E9}
+  .light .day.hit .cell{background:var(--lime);border-color:var(--lime)}
+  .light .seg{background:#EDEEF1;border-color:#E2E3E7}.light .seg button{color:#6B6C73}
+  .light .chip{background:#fff;border-color:#E4E5E9;color:#55565E}
+  .light .rank.me{background:rgba(212,255,63,.16);border-color:rgba(120,140,20,.4)}
+
+  /* ---------- floating dock ---------- */
+  .dock{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;
+    display:flex;gap:5px;background:rgba(20,20,23,.86);border:1px solid var(--line2);
+    padding:7px;border-radius:16px;backdrop-filter:blur(16px);max-width:94vw;overflow-x:auto;
+    box-shadow:0 20px 50px -20px #000;
+  }
+  .dock::-webkit-scrollbar{height:0}
+  .dock button{flex:none;height:34px;padding:0 13px;border-radius:10px;border:none;background:transparent;
+    color:var(--t2);font-family:var(--body);font-weight:600;font-size:12.5px;cursor:pointer;white-space:nowrap}
+  .dock button.on{background:var(--lime);color:#0B0B0D}
+  .dock .num{font-family:var(--stat);font-weight:800;opacity:.6;margin-right:5px}
+  .dock button.on .num{opacity:.75}
+</style>
+
+<style id="appmode">
+  /* ---- installed-app / mobile-first overrides ---- */
+  html{background:#050506}
+  body{padding:0!important;margin:0;min-height:100vh;min-height:100dvh;background:var(--bg)!important;
+       display:block;overscroll-behavior:none}
+  .studio,.dock,.island,.status{display:none!important}
+  .phone{width:100%!important;max-width:480px;height:100vh!important;height:100dvh!important;height:100svh!important;
+         border-radius:0!important;border:none!important;box-shadow:none!important;margin:0 auto;background:var(--bg)}
+  .phone.light{background:#F4F5F7}
+  .scroll{padding-top:calc(env(safe-area-inset-top,0px) + 22px)!important;overscroll-behavior:contain}
+  .has-tab .scroll{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))!important}
+  .tabbar{height:calc(88px + env(safe-area-inset-bottom,0px));padding-bottom:calc(env(safe-area-inset-bottom,0px))}
+  /* absolute footers (onboarding / active / complete / friend) clear the home indicator */
+  .viewport [style*="left:0;right:0;bottom:0"]{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))!important}
+</style>
+
+
+<div class="studio">
+  <div class="mark"><span class="dot"></span>GYM<b>STREAK</b></div>
+  <p>Gym accountability, with friends · iOS prototype · 390 × 844 · tap the tab bar &amp; buttons to move around</p>
+</div>
+
+<div class="phone" id="phone">
+  <div class="island"></div>
+  <div class="status" id="statusbar">
+    <span>9:41</span>
+    <span class="rt">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="1" fill="currentColor"/><rect x="5" y="4" width="3" height="8" rx="1" fill="currentColor"/><rect x="10" y="1.5" width="3" height="10.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor" opacity=".35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 2.2C10.2 2.2 12.2 3 13.7 4.4l1.2-1.3C13 1.3 10.6.3 8 .3S3 1.3 1.1 3.1L2.3 4.4C3.8 3 5.8 2.2 8 2.2Z" fill="currentColor"/><path d="M8 6c1.2 0 2.3.45 3.1 1.2l1.25-1.3C11.2 4.75 9.7 4.1 8 4.1s-3.2.65-4.35 1.8L4.9 7.2C5.7 6.45 6.8 6 8 6Z" fill="currentColor"/><circle cx="8" cy="9.6" r="1.7" fill="currentColor"/></svg>
+      <svg width="26" height="13" viewBox="0 0 26 13" fill="none"><rect x=".6" y=".6" width="21" height="11.8" rx="3" stroke="currentColor" opacity=".4"/><rect x="2.2" y="2.2" width="15" height="8.6" rx="1.6" fill="currentColor"/><rect x="23" y="4.2" width="1.8" height="4.6" rx=".9" fill="currentColor" opacity=".5"/></svg>
+    </span>
+  </div>
+
+  <div class="viewport" id="viewport"><!-- screens injected --></div>
+</div>
+
+<div class="dock" id="dock"></div>
+
+<script>
+/* ============================ DATA ============================ */
+const AV = {
+  you:['DD','#D4FF3F'], maya:['MC','#8FB3FF'], jordan:['JR','#FFB27A'],
+  priya:['PN','#C79BFF'], marcus:['MW','#7EE0C0'], devon:['DC','#FF9FB0'],
+  sofia:['SA','#FFD166'], liam:['LO','#9AE66E'], ana:['AK','#7AC7FF']
+};
+function avatar(key,size,live){
+  const [ini,col]=AV[key]||['?','#888'];
+  const fs=Math.round(size*0.36);
+  return `<div class="av${live?' live':''}" style="width:${size}px;height:${size}px;background:${col};font-size:${fs}px">${ini}${live?'<span class="ping"></span>':''}</div>`;
+}
+/* icons */
+const I={
+  home:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 3l9 7.5V21H3V10.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  board:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6 21V9M12 21V4M18 21v-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  friends:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M3.5 20c.6-3.3 3-5.2 5.5-5.2S13.9 16.7 14.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 5.2A3 3 0 0 1 16 11M17.5 20c-.3-2.1-1.2-3.7-2.6-4.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  person:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.6" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  bolt:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="currentColor"/></svg>',
+  chev:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  back:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  search:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  check:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11" stroke="#0B0B0D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  pin:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" fill="currentColor"/></svg>',
+  share:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 15V3m0 0L8 7m4-4 4 4" stroke="#0B0B0D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" stroke="#0B0B0D" stroke-width="2" stroke-linecap="round"/></svg>',
+  plus:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+};
+/* mini map thumbnail (procedural) */
+function mapThumb(seed){
+  const c=['#20242b','#232830','#1d2128'][seed%3];
+  return `<svg width="58" height="58" viewBox="0 0 58 58"><rect width="58" height="58" rx="12" fill="${c}"/><path d="M-4 ${14+seed*3}h66M-4 ${40-seed*2}h66" stroke="#3a4048" stroke-width="6"/><path d="M${12+seed*4} -4v66M${42-seed*3} -4v66" stroke="#31363e" stroke-width="5"/><circle cx="29" cy="29" r="6" fill="#D4FF3F"/><circle cx="29" cy="29" r="6" fill="none" stroke="#0B0B0D" stroke-width="1.5"/></svg>`;
+}
+
+const FRIENDS=[
+  {k:'maya',   n:'Maya Chen',       u:'mayaruns',    streak:23, hrs:'9h 40m', sess:7, live:true,  gym:'Equinox Bowery'},
+  {k:'jordan', n:'Jordan Ruiz',     u:'jru_lifts',   streak:41, hrs:'8h 15m', sess:6, live:false, gym:'Barry’s SoHo'},
+  {k:'priya',  n:'Priya Nair',      u:'priyapr',     streak:12, hrs:'7h 05m', sess:6, live:true,  gym:'Chelsea Piers'},
+  {k:'marcus', n:'Marcus Webb',     u:'mwebb',       streak:5,  hrs:'6h 30m', sess:5, live:false, gym:'Blink Union Sq'},
+  {k:'devon',  n:'Devon Clarke',    u:'devrunsnyc',  streak:18, hrs:'5h 50m', sess:5, live:false, gym:'Crunch Lafayette'},
+  {k:'sofia',  n:'Sofia Almeida',   u:'soflifts',    streak:8,  hrs:'4h 20m', sess:4, live:false, gym:'Equinox Bowery'},
+  {k:'liam',   n:'Liam O’Brien',    u:'liamob',      streak:3,  hrs:'3h 10m', sess:3, live:false, gym:'Planet Fitness'},
+];
+
+/* ============================ SCREEN BUILDERS ============================ */
+const S={};
+
+/* 1. ONBOARDING */
+const GYMS=[
+  {n:'Equinox Bowery',        a:'6 Cooper Sq, New York',      d:'0.3 mi'},
+  {n:'Barry’s SoHo',          a:'110 Greene St, New York',    d:'0.6 mi'},
+  {n:'Blink Fitness Union Sq',a:'4 Union Sq E, New York',     d:'0.8 mi'},
+  {n:'Chelsea Piers Fitness', a:'Pier 60, Chelsea',           d:'1.4 mi'},
+  {n:'Crunch Lafayette',      a:'623 Broadway, New York',     d:'1.7 mi'},
+];
+S.onboard=()=>`
+<div class="scroll">
+  <div style="margin-bottom:18px">
+    <div class="eyebrow">Step 1 of 3</div>
+    <div class="h1" style="margin-top:9px">Pick your home gym</div>
+    <p class="sub" style="margin-top:8px">We’ll auto-detect check-ins when you arrive. You can change this anytime.</p>
+  </div>
+  <div class="card row" style="padding:0 14px;height:52px;margin-bottom:16px;gap:10px">
+    ${I.search}<span class="muted" style="font-size:15px">Search gyms near you</span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    ${GYMS.map((g,i)=>`
+      <button class="card gymrow row" data-gym="${i}" style="gap:13px;cursor:pointer;text-align:left;width:100%">
+        <div style="width:58px;height:58px;flex:none">${mapThumb(i)}</div>
+        <div style="flex:1;min-width:0">
+          <b style="font-size:15px;font-weight:600;display:block">${g.n}</b>
+          <span class="muted tny">${g.a}</span>
+        </div>
+        <div style="text-align:right;flex:none">
+          <div class="row" style="gap:4px;color:var(--t3);font-size:12px;justify-content:flex-end">${I.pin}${g.d}</div>
+          <div class="tick" style="margin-top:8px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line2);margin-left:auto"></div>
+        </div>
+      </button>`).join('')}
+  </div>
+  <p class="muted tny" style="text-align:center;margin-top:16px">Don’t see your gym? <span style="color:var(--lime);font-weight:600">Add it manually</span></p>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px 28px;background:linear-gradient(to top,var(--bg) 60%,transparent)">
+  <button class="btn btn-primary" onclick="go('home')">${I.check}This is my gym</button>
+</div>`;
+
+/* 2. HOME (theme-agnostic body; wrapper adds .has-tab) */
+function homeBody(){
+  const days=[['M',1],['T',1],['W',1],['T',1],['F',0,'today'],['S',0],['S',0]];
+  return `
+  <div class="between" style="margin-bottom:20px">
+    <div><div class="eyebrow">Friday · Aug 1</div><div class="h1" style="margin-top:6px;font-size:24px">Hey, David</div></div>
+    <button class="themebtn backbtn" title="Toggle light / dark">☾</button>
+  </div>
+
+  <div class="card" style="padding:22px;position:relative;overflow:hidden">
+    <div style="position:absolute;right:-30px;top:-30px;width:160px;height:160px;background:radial-gradient(circle,rgba(212,255,63,.14),transparent 70%)"></div>
+    <div class="between" style="align-items:flex-start">
+      <div>
+        <div class="eyebrow">Current streak</div>
+        <div class="row" style="align-items:flex-end;gap:10px;margin-top:6px">
+          <span class="stat-num flame" style="font-size:82px">14</span>
+          <span style="color:var(--lime);font-size:30px;margin-bottom:14px">${I.bolt}</span>
+        </div>
+        <div class="muted" style="font-size:13px;margin-top:-4px">days in a row · personal best is 21</div>
+      </div>
+      <div class="pill pill-live" style="height:28px">🔥 On fire</div>
+    </div>
+    <div class="divider" style="margin:18px 0 14px"></div>
+    <div class="between">
+      <div><div class="eyebrow">This week</div><div class="stat-num" style="font-size:26px;margin-top:4px">6<span style="font-size:15px;color:var(--t2);font-weight:600">h</span> 45<span style="font-size:15px;color:var(--t2);font-weight:600">m</span></div></div>
+      <div style="text-align:right"><div class="eyebrow">Rank</div><div class="stat-num flame" style="font-size:26px;margin-top:4px">#3</div></div>
+    </div>
+  </div>
+
+  <div style="margin:16px 0 8px" class="between">
+    <div class="eyebrow">Your week</div><span class="muted tny">4 of 7 days</span>
+  </div>
+  <div class="card"><div class="week">
+    ${days.map(([l,hit,t])=>`<div class="day ${hit?'hit':''} ${t||''}"><span class="lab">${l}</span><div class="cell">${hit?I.bolt.replace('24 24','24 24').replace('fill="currentColor"','fill="#0B0B0D"'):''}</div></div>`).join('')}
+  </div></div>
+
+  <button class="btn btn-primary" style="margin:18px 0" onclick="go('active')">${I.bolt}Check in at Equinox Bowery</button>
+
+  <div class="eyebrow" style="margin-bottom:10px">This week’s stats</div>
+  <div class="grid2">
+    ${statCard('Sessions','6','+2 vs last wk','up')}
+    ${statCard('Total time','6h 45m','+52m','up')}
+    ${statCard('Avg session','67m','−4m','dn')}
+    ${statCard('vs friends','#3','▲ 1 spot','up')}
+  </div>
+
+  <div class="between" style="margin:20px 0 10px">
+    <div class="eyebrow">Leaderboard · this week</div>
+    <button class="muted tny" style="background:none;border:none;color:var(--lime);font-weight:600;cursor:pointer" onclick="go('board')">See all</button>
+  </div>
+  <div class="card" style="padding:6px">
+    ${rankRow(1,'jordan','Jordan Ruiz','8h 15m',null,'gold')}
+    ${rankRow(2,'maya','Maya Chen','9h 40m',null,'silver')}
+    ${rankRow(3,'you','You','6h 45m',null,null,true)}
+  </div>`;
+}
+function statCard(label,val,delta,dir){
+  return `<div class="card" style="padding:16px">
+    <div class="eyebrow">${label}</div>
+    <div class="stat-num" style="font-size:30px;margin:8px 0 6px">${val}</div>
+    <div class="tny ${dir}" style="font-weight:700">${delta}</div>
+  </div>`;
+}
+function rankRow(pos,key,name,val,trend,medal,me){
+  const posDisp=medal?({gold:'🥇',silver:'🥈',bronze:'🥉'}[medal]):pos;
+  return `<div class="rank ${me?'me':''}" ${me?'':`onclick="go('fprofile')"`} style="cursor:pointer">
+    <span class="pos">${posDisp}</span>
+    ${avatar(key,40)}
+    <div class="nm"><b>${name}</b><span>${key==='you'?'that’s you':''}</span></div>
+    ${trend?`<span class="trend ${trend[0]}">${trend[1]}</span>`:''}
+    <span class="val" ${medal==='gold'?'style="color:var(--lime)"':''}>${val}</span>
+  </div>`;
+}
+S.home=()=>`<div class="scroll">${homeBody()}</div>${tabbar('home')}`;
+
+/* 3. ACTIVE SESSION */
+S.active=()=>`
+<div class="scroll" style="padding-top:70px;display:flex;flex-direction:column;align-items:center;text-align:center">
+  <div class="pill pill-live" style="margin-bottom:26px"><span class="dotlive"></span>Live · tracking</div>
+  <div class="muted" style="font-size:13px">You’re at</div>
+  <div class="h1" style="font-size:26px;margin:6px 0 30px">Equinox Bowery</div>
+
+  <div style="position:relative;width:250px;height:250px;margin-bottom:8px">
+    <svg width="250" height="250" viewBox="0 0 250 250" style="transform:rotate(-90deg)">
+      <circle cx="125" cy="125" r="112" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="10"/>
+      <circle id="ring" cx="125" cy="125" r="112" fill="none" stroke="var(--lime)" stroke-width="10" stroke-linecap="round"
+        stroke-dasharray="703" stroke-dashoffset="240" style="filter:drop-shadow(0 0 10px rgba(212,255,63,.5))"/>
+    </svg>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div class="eyebrow">Elapsed</div>
+      <div id="timer" class="stat-num" style="font-family:var(--mono);font-weight:700;font-size:52px;letter-spacing:-.02em;margin-top:6px">23:14</div>
+      <div class="muted tny" style="margin-top:6px">Goal 60m · 39% there</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="width:100%;margin:26px 0 20px">
+    ${statCard('Started','8:53 AM','morning session','up')}
+    ${statCard('Est. burn','312 cal','~13 cal/min','up')}
+  </div>
+  <p class="muted tny" style="max-width:260px;line-height:1.5">Keep your phone with you — GymStreak ends the session automatically when you leave the building.</p>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px 28px;background:linear-gradient(to top,var(--bg) 60%,transparent)">
+  <button class="btn btn-ghost" onclick="go('complete')">End session</button>
+</div>`;
+
+/* 4. SESSION COMPLETE */
+S.complete=()=>`
+<div class="scroll" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:80px">
+  <div style="width:78px;height:78px;border-radius:24px;background:var(--lime);display:grid;place-items:center;margin-bottom:22px;box-shadow:0 14px 40px -12px rgba(212,255,63,.6)">${I.check.replace('22','40').replace('22','40')}</div>
+  <div class="eyebrow">Session complete</div>
+  <div class="stat-num" style="font-size:80px;margin:10px 0 2px">64<span style="font-size:26px;color:var(--t2);font-weight:700"> min</span></div>
+  <div class="muted" style="font-size:14px">Equinox Bowery · 8:53 – 9:57 AM</div>
+
+  <div class="card" style="width:100%;margin:26px 0 14px;background:linear-gradient(180deg,rgba(212,255,63,.1),transparent)">
+    <div class="row" style="justify-content:center;gap:12px">
+      <span class="stat-num flame" style="font-size:44px">15</span>
+      <span style="color:var(--lime);font-size:26px">${I.bolt}</span>
+      <div style="text-align:left"><div style="font-weight:700;font-size:15px">Day streak, extended</div><div class="muted tny">+1 today · 6 days to a new record</div></div>
+    </div>
+  </div>
+
+  <div class="grid2" style="width:100%">
+    ${statCard('Duration','64m','+9m vs avg','up')}
+    ${statCard('Time of day','Morning','before 10 AM','up')}
+    ${statCard('This week','7h 49m','4th session','up')}
+    ${statCard('Est. burn','338 cal','morning fuel','up')}
+  </div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px 28px;background:linear-gradient(to top,var(--bg) 60%,transparent);display:flex;flex-direction:column;gap:10px">
+  <button class="btn btn-primary" onclick="go('feed')">${I.share}Share to friends</button>
+  <button class="btn btn-dark" onclick="go('home')">Done</button>
+</div>`;
+
+/* 5. LEADERBOARD */
+const LB=[
+  ['jordan','Jordan Ruiz','8h 15m',['up','▲2']],
+  ['maya','Maya Chen','9h 40m',['dn','▼1']],
+  ['you','You','6h 45m',['up','▲1']],
+  ['priya','Priya Nair','7h 05m',['up','▲1']],
+  ['devon','Devon Clarke','5h 50m',['dn','▼2']],
+  ['marcus','Marcus Webb','6h 30m',['up','▲3']],
+  ['sofia','Sofia Almeida','4h 20m',['dn','▼1']],
+  ['liam','Liam O’Brien','3h 10m',['up','▲2']],
+];
+S.board=()=>`
+<div class="scroll">
+  <div class="between" style="margin-bottom:16px">
+    <div class="h1" style="font-size:24px">Leaderboard</div>
+    <div class="pill" style="background:var(--raise);color:var(--t2)">8 friends</div>
+  </div>
+  <div class="seg" style="margin-bottom:12px">
+    <button class="on">This Week</button><button>This Month</button><button>All Time</button>
+  </div>
+  <div class="chips" style="margin-bottom:18px">
+    <button class="chip on">Total Time</button><button class="chip">Sessions</button><button class="chip">Longest Streak</button>
+  </div>
+
+  <div class="podium">
+    <div class="pod p2"><div>${avatar('maya',52)}</div><div class="plat"><div class="medal" style="color:var(--silver)">2</div><div class="pn">Maya</div><div class="pv">9h 40m</div></div></div>
+    <div class="pod p1"><div style="position:relative">${avatar('jordan',60)}<div style="position:absolute;-top:8px;top:-16px;left:50%;transform:translateX(-50%);font-size:18px">👑</div></div><div class="plat"><div class="medal" style="color:var(--lime)">1</div><div class="pn" style="color:var(--t1)">Jordan</div><div class="pv" style="color:var(--lime)">8h 15m</div></div></div>
+    <div class="pod p3"><div>${avatar('you',52)}</div><div class="plat"><div class="medal" style="color:var(--bronze)">3</div><div class="pn">You</div><div class="pv">6h 45m</div></div></div>
+  </div>
+
+  <div class="card" style="padding:6px;margin-top:14px">
+    ${LB.map((r,i)=>rankRow(i+1,r[0],r[1],r[2],r[3],null,r[0]==='you')).join('<div class="divider" style="margin:0 12px"></div>')}
+  </div>
+  <p class="muted tny" style="text-align:center;margin-top:14px">Resets Monday 12:00 AM · winner gets bragging rights 🏆</p>
+</div>
+${tabbar('board')}`;
+
+/* Leaderboard EMPTY (reachable via dock) */
+S.boardEmpty=()=>`
+<div class="scroll">
+  <div class="h1" style="font-size:24px;margin-bottom:16px">Leaderboard</div>
+  <div class="seg" style="margin-bottom:12px"><button class="on">This Week</button><button>This Month</button><button>All Time</button></div>
+  <div class="empty" style="margin-top:60px">
+    <div class="ico" style="color:var(--lime)">${I.board}</div>
+    <div><div style="font-weight:700;font-size:17px;color:var(--t1)">No one to race yet</div>
+    <p class="sub" style="margin-top:8px;max-width:250px">Add a few friends and your weekly rankings show up here — every session counts.</p></div>
+    <button class="btn btn-primary" style="width:auto;padding:0 24px" onclick="go('friends')">${I.plus}Add friends</button>
+  </div>
+</div>${tabbar('board')}`;
+
+/* 6. FRIEND PROFILE */
+function heatCells(){
+  let out='';const lv=['','','l1','l1','l2','l2','l3'];
+  for(let i=0;i<91;i++){const r=Math.random();const c=r>.82?'l3':r>.62?'l2':r>.4?'l1':r>.28?'':'';out+=`<i class="${c}"></i>`;}
+  return out;
+}
+S.fprofile=()=>`
+<div class="scroll">
+  <div class="row" style="margin-bottom:20px"><button class="backbtn" onclick="go('board')">${I.back}</button><div style="flex:1"></div>
+    <button class="btn-sm btn" style="background:var(--raise);color:var(--t1);border:1px solid var(--line)">Following</button></div>
+  <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+    ${avatar('maya',88,true)}
+    <div class="h1" style="font-size:24px;margin:14px 0 4px">Maya Chen</div>
+    <div class="pill pill-live"><span class="dotlive"></span>At the gym now · Equinox Bowery</div>
+  </div>
+  <div class="card" style="margin:20px 0;padding:20px;display:flex;justify-content:space-around;text-align:center">
+    <div><div class="stat-num flame" style="font-size:32px">23</div><div class="eyebrow" style="margin-top:6px">Streak</div></div>
+    <div style="width:1px;background:var(--line)"></div>
+    <div><div class="stat-num" style="font-size:32px">7</div><div class="eyebrow" style="margin-top:6px">This wk</div></div>
+    <div style="width:1px;background:var(--line)"></div>
+    <div><div class="stat-num" style="font-size:32px">148</div><div class="eyebrow" style="margin-top:6px">All time</div></div>
+  </div>
+  <div class="grid2" style="margin-bottom:18px">
+    ${statCard('Total time','9h 40m','this week','up')}
+    ${statCard('Avg session','83m','longest today','up')}
+  </div>
+
+  <div class="between" style="margin-bottom:10px"><div class="eyebrow">Last 3 months</div><span class="muted tny">62 sessions</span></div>
+  <div class="card"><div class="heat">${heatCells()}</div>
+    <div class="row" style="justify-content:flex-end;gap:5px;margin-top:12px;font-size:11px;color:var(--t3)">Less<i style="width:11px;height:11px;border-radius:3px;background:var(--raise);display:inline-block"></i><i style="width:11px;height:11px;border-radius:3px;background:rgba(212,255,63,.28);display:inline-block"></i><i style="width:11px;height:11px;border-radius:3px;background:rgba(212,255,63,.55);display:inline-block"></i><i style="width:11px;height:11px;border-radius:3px;background:var(--lime);display:inline-block"></i>More</div>
+  </div>
+
+  <div class="eyebrow" style="margin:20px 0 10px">Recent sessions</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    ${[['Today','Equinox Bowery','74 min','8:20 AM'],['Yesterday','Equinox Bowery','66 min','7:05 AM'],['Wed','Barry’s SoHo','52 min','6:40 PM'],['Tue','Equinox Bowery','88 min','8:00 AM']].map(s=>`
+      <div class="card row between" style="padding:14px 16px"><div><b style="font-size:14px;font-weight:600">${s[1]}</b><div class="muted tny">${s[0]} · ${s[3]}</div></div><div class="stat-num" style="font-size:20px">${s[2].split(' ')[0]}<span style="font-size:12px;color:var(--t2)">m</span></div></div>`).join('')}
+  </div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px 28px;background:linear-gradient(to top,var(--bg) 60%,transparent);display:flex;gap:10px">
+  <button class="btn btn-primary" style="flex:1" onclick="nudge(this)">👋 Nudge</button>
+  <button class="btn btn-dark" style="flex:1">⚔️ Challenge</button>
+</div>`;
+
+/* 7. FRIENDS */
+S.friends=()=>`
+<div class="scroll">
+  <div class="between" style="margin-bottom:16px"><div class="h1" style="font-size:24px">Friends</div>
+    <button class="backbtn" style="color:var(--lime)">${I.plus}</button></div>
+  <div class="card row" style="padding:0 14px;height:50px;gap:10px;margin-bottom:14px">${I.search}<span class="muted" style="font-size:15px">Search by @username</span></div>
+  <div class="grid2" style="margin-bottom:22px">
+    <button class="card" style="cursor:pointer;text-align:center;padding:16px 10px"><div style="font-size:22px">📇</div><div style="font-weight:600;font-size:13.5px;margin-top:8px">Invite contacts</div></button>
+    <button class="card" style="cursor:pointer;text-align:center;padding:16px 10px"><div style="font-size:22px">🔗</div><div style="font-weight:600;font-size:13.5px;margin-top:8px">Share invite link</div></button>
+  </div>
+
+  <div class="eyebrow" style="margin-bottom:10px">At the gym now · 2</div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px">
+    ${FRIENDS.filter(f=>f.live).map(f=>friendRow(f)).join('')}
+  </div>
+  <div class="eyebrow" style="margin-bottom:10px">All friends · ${FRIENDS.length}</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    ${FRIENDS.filter(f=>!f.live).map(f=>friendRow(f)).join('')}
+  </div>
+  <p class="muted tny" style="text-align:center;margin-top:20px;line-height:1.5">Want the empty state?<br><span style="color:var(--lime);font-weight:600;cursor:pointer" onclick="go('friendsEmpty')">Preview no-friends view →</span></p>
+</div>
+${tabbar('friends')}`;
+function friendRow(f){
+  return `<button class="card row" style="gap:12px;cursor:pointer;text-align:left;width:100%" onclick="go('fprofile')">
+    ${avatar(f.k,46,f.live)}
+    <div style="flex:1;min-width:0"><b style="font-size:15px;font-weight:600;display:block">${f.n}</b>
+      ${f.live?`<span class="tny" style="color:var(--lime);font-weight:600">At ${f.gym} now</span>`:`<span class="muted tny">🔥 ${f.streak} day streak · @${f.u}</span>`}</div>
+    ${f.live?`<span class="pill pill-live" style="height:24px;font-size:11px"><span class="dotlive"></span>Live</span>`:I.chev}
+  </button>`;
+}
+S.friendsEmpty=()=>`
+<div class="scroll">
+  <div class="h1" style="font-size:24px;margin-bottom:20px">Friends</div>
+  <div class="empty" style="margin-top:50px">
+    <div class="ico" style="color:var(--lime)">${I.friends}</div>
+    <div><div style="font-weight:700;font-size:17px;color:var(--t1)">Working out is better together</div>
+    <p class="sub" style="margin-top:8px;max-width:250px">Accountability doubles when someone’s watching your streak. Add your first friend to get started.</p></div>
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px">
+      <button class="btn btn-primary">📇 Invite from contacts</button>
+      <button class="btn btn-dark">🔗 Share your invite link</button>
+    </div>
+  </div>
+</div>${tabbar('friends')}`;
+
+/* 8. ACTIVITY FEED */
+const FEED=[
+  {k:'maya',n:'Maya Chen',t:'12m ago',txt:'finished a <b>74 min</b> session at <b>Equinox Bowery</b>',milestone:false,react:{fire:14,muscle:6,clap:3}},
+  {k:'jordan',n:'Jordan Ruiz',t:'40m ago',milestone:'🔥 41-day streak',txt:'hit a new personal record — <b>41 days</b> in a row',react:{fire:28,muscle:11,clap:9}},
+  {k:'priya',n:'Priya Nair',t:'1h ago',txt:'checked in at <b>Chelsea Piers Fitness</b>',live:true,react:{fire:5,muscle:2,clap:1}},
+  {k:'devon',n:'Devon Clarke',t:'3h ago',txt:'finished a <b>52 min</b> leg day at <b>Crunch Lafayette</b>',react:{fire:9,muscle:12,clap:2}},
+  {k:'you',n:'You',t:'5h ago',txt:'finished a <b>64 min</b> session at <b>Equinox Bowery</b>',react:{fire:7,muscle:4,clap:2}},
+];
+S.feed=()=>`
+<div class="scroll">
+  <div class="between" style="margin-bottom:16px"><div class="h1" style="font-size:24px">Activity</div>
+    <div class="pill pill-live"><span class="dotlive"></span>2 live now</div></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    ${FEED.map((p,i)=>`
+      <div class="card" ${p.milestone?'style="background:linear-gradient(180deg,rgba(212,255,63,.09),transparent);border-color:rgba(212,255,63,.28)"':''}>
+        <div class="row" style="gap:12px;margin-bottom:12px">
+          ${avatar(p.k,44,p.live)}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;line-height:1.4"><b style="font-weight:700">${p.n}</b> <span class="muted">${p.txt}</span></div>
+            <div class="muted tny" style="margin-top:3px">${p.t}${p.milestone?` · <span style="color:var(--lime);font-weight:700">${p.milestone}</span>`:''}</div>
+          </div>
+        </div>
+        <div class="row" style="gap:8px" data-react>
+          ${['🔥','💪','👏'].map((e,j)=>`<button class="reactbtn" onclick="react(this)"><span>${e}</span><span class="rc">${Object.values(p.react)[j]}</span></button>`).join('')}
+          <div style="flex:1"></div>
+          <div class="row" style="margin-left:-6px">${['maya','jordan','priya'].slice(0,3).map((k,z)=>`<div style="margin-left:-8px;border:2px solid var(--card);border-radius:50%">${avatar(k,22)}</div>`).join('')}</div>
+        </div>
+      </div>`).join('')}
+  </div>
+</div>${tabbar('feed')}`;
+
+/* 9. PROFILE / SETTINGS */
+S.profile=()=>`
+<div class="scroll">
+  <div class="between" style="margin-bottom:20px"><div class="h1" style="font-size:24px">Profile</div>
+    <button class="backbtn">${I.bell}</button></div>
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px">
+    ${avatar('you',80)}
+    <div class="h1" style="font-size:22px;margin:14px 0 2px">David DiMino</div>
+    <div class="muted tny">@daviddimino · Joined Mar 2026</div>
+    <div class="pill pill-live" style="margin-top:12px">🔥 14-day streak</div>
+  </div>
+
+  <div class="eyebrow" style="margin:22px 0 10px">All-time stats</div>
+  <div class="grid2">
+    ${statCard('Total sessions','186','since March','up')}
+    ${statCard('Total hours','204h','avg 66m','up')}
+    ${statCard('Longest streak','21','days','up')}
+    ${statCard('This year','142','sessions','up')}
+  </div>
+
+  <div class="eyebrow" style="margin:22px 0 10px">Your gym</div>
+  <div class="card row between" style="padding:16px"><div class="row" style="gap:12px"><div style="width:46px;height:46px">${mapThumb(0)}</div><div><b style="font-size:15px;font-weight:600">Equinox Bowery</b><div class="muted tny">6 Cooper Sq · 0.3 mi</div></div></div>${I.chev}</div>
+
+  <div class="eyebrow" style="margin:22px 0 10px">Notifications</div>
+  <div class="card" style="padding:6px 16px">
+    ${toggleRow('Streak reminders','8 PM if you haven’t checked in',true)}
+    ${toggleRow('Friend milestones','when a friend hits a record',true)}
+    ${toggleRow('Nudges from friends','',true)}
+    ${toggleRow('Weekly recap','Sunday evenings',false,true)}
+  </div>
+
+  <div class="eyebrow" style="margin:22px 0 10px">Privacy · what friends see</div>
+  <div class="card" style="padding:6px 16px">
+    ${toggleRow('Live “at the gym” status','',true)}
+    ${toggleRow('Session durations','',true)}
+    ${toggleRow('Which gym I’m at','',false)}
+    ${toggleRow('Appear on leaderboard','',true,true)}
+  </div>
+
+  <button class="btn btn-dark" style="margin:20px 0 10px">Edit profile</button>
+  <p class="muted tny" style="text-align:center">GymStreak v1.0 · Sign out</p>
+</div>${tabbar('profile')}`;
+function toggleRow(t,sub,on,last){
+  return `<div class="between" style="padding:13px 0;${last?'':'border-bottom:1px solid var(--line)'}">
+    <div><div style="font-size:14.5px;font-weight:500">${t}</div>${sub?`<div class="muted tny" style="margin-top:2px">${sub}</div>`:''}</div>
+    <div class="sw ${on?'on':''}" onclick="this.classList.toggle('on')"></div></div>`;
+}
+
+/* ============================ TAB BAR ============================ */
+function tabbar(active){
+  const tabs=[['home','Home',I.home],['board','Leaderboard',I.board],['feed','Activity',I.bolt],['friends','Friends',I.friends],['profile','Profile',I.person]];
+  return `<div class="tabbar">${tabs.map(t=>`<button class="tab ${t[0]===active?'on':''}" onclick="go('${t[0]}')">${t[2]}<span>${t[1]}</span></button>`).join('')}</div>`;
+}
+
+/* ============================ NAV / DOCK ============================ */
+const SCREENS=[
+  ['onboard','1 · Onboarding',false],
+  ['home','2 · Home',true],
+  ['active','3 · Active',false],
+  ['complete','4 · Complete',false],
+  ['board','5 · Leaderboard',true],
+  ['fprofile','6 · Friend',false],
+  ['friends','7 · Friends',true],
+  ['feed','8 · Activity',true],
+  ['profile','9 · Profile',true],
+  ['boardEmpty','Empty · Board',false],
+  ['friendsEmpty','Empty · Friends',false],
+];
+let lightMode=false;
+const vp=document.getElementById('viewport');
+const dock=document.getElementById('dock');
+const phone=document.getElementById('phone');
+let current='onboard';
+
+function go(id){
+  current=id;
+  const hasTab=['home','board','feed','friends','profile','boardEmpty','friendsEmpty'].includes(id);
+  vp.innerHTML=`<div class="screen active ${hasTab?'has-tab':''}">${S[id]()}</div>`;
+  // light theme only meaningful on home
+  phone.classList.toggle('light', lightMode && id==='home');
+  document.querySelectorAll('#dock button').forEach(b=>b.classList.toggle('on',b.dataset.s===id));
+  // wire theme button + gym select if present
+  const tb=vp.querySelector('.themebtn');
+  if(tb){tb.textContent=lightMode?'☀':'☾';tb.onclick=()=>{lightMode=!lightMode;go('home');};}
+  wireGym();
+  vp.querySelector('.scroll')?.scrollTo(0,0);
+}
+function wireGym(){
+  vp.querySelectorAll('.gymrow').forEach(r=>r.onclick=()=>{
+    vp.querySelectorAll('.gymrow').forEach(x=>{x.style.borderColor='var(--line)';x.querySelector('.tick').style.cssText='margin-top:8px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line2);margin-left:auto';});
+    r.style.borderColor='var(--lime)';
+    r.querySelector('.tick').style.cssText='margin-top:8px;width:24px;height:24px;border-radius:50%;margin-left:auto;background:var(--lime);display:grid;place-items:center';
+    r.querySelector('.tick').innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11" stroke="#0B0B0D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  });
+}
+function react(btn){
+  const c=btn.querySelector('.rc');const on=btn.classList.toggle('reacted');
+  c.textContent=+c.textContent+(on?1:-1);
+}
+function nudge(btn){btn.textContent='✓ Nudged Maya';btn.style.background='var(--raise)';btn.style.color='var(--lime)';setTimeout(()=>{btn.innerHTML='👋 Nudge';btn.style.background='';btn.style.color='';},1600);}
+
+/* build dock */
+dock.innerHTML=SCREENS.map(s=>`<button data-s="${s[0]}" onclick="go('${s[0]}')">${s[1]}</button>`).join('');
+
+/* reaction button style injected */
+const st=document.createElement('style');
+st.textContent=`.reactbtn{display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--raise);border:1px solid var(--line);color:var(--t2);font-size:14px;font-weight:600;cursor:pointer}
+.reactbtn.reacted{background:rgba(212,255,63,.14);border-color:rgba(212,255,63,.4);color:var(--lime)}
+.reactbtn .rc{font-variant-numeric:tabular-nums}
+.dotlive{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.35}}`;
+document.head.appendChild(st);
+
+/* live timer on active screen */
+let base=Date.now()-1394*1000;
+setInterval(()=>{
+  const t=document.getElementById('timer');if(!t)return;
+  let s=Math.floor((Date.now()-base)/1000);
+  const m=String(Math.floor(s/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');
+  t.textContent=`${m}:${ss}`;
+  const ring=document.getElementById('ring');
+  if(ring){const frac=Math.min((s/60)/60,1);ring.setAttribute('stroke-dashoffset',703-703*frac);}
+},1000);
+
+go('onboard');
+</script>
+
+</body>
+</html>
