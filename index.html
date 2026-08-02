@@ -311,6 +311,19 @@
   .light .chip{background:#fff;border-color:#E4E5E9;color:#55565E}
   .light .rank.me{background:rgba(212,255,63,.16);border-color:rgba(120,140,20,.4)}
 
+  /* ---------- frozen app header + scrollable body (tab screens) ---------- */
+  .scr-head{flex:none;background:var(--bg);padding:var(--top-inset) 20px 12px;z-index:8;
+    border-bottom:1px solid transparent;transition:border-color .2s}
+  .scr-head.stuck{border-bottom-color:var(--line)}
+  .scr-body{flex:1;min-height:0;overflow-y:auto;padding:10px 20px 22px}
+  .scr-body::-webkit-scrollbar{width:0}
+  .has-tab .scr-body{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+  .light .scr-head{background:#F4F5F7}
+  /* profile avatar button (top-right → profile) */
+  .pfp{flex:none;padding:0;border:none;background:none;cursor:pointer;border-radius:50%;line-height:0}
+  .pfp .av{box-shadow:0 0 0 2px var(--line2)}
+  .light .pfp .av{box-shadow:0 0 0 2px #E2E3E7}
+
   /* ---------- floating dock ---------- */
   .dock{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;
@@ -532,17 +545,6 @@ function homeBody(){
   const days=[['M',1],['T',1],['W',0],['T',1,'today'],['F',1],['S',0],['S',0]];
   const dayCheck=I.check.replace('width="22" height="22"','width="20" height="20"');
   return `
-  <div class="between" style="margin-bottom:22px">
-    <div class="row" style="gap:11px">
-      <div class="logo-mark">${I.bolt}</div>
-      <span class="wordmark">GymStreak</span>
-    </div>
-    <div class="row" style="gap:9px">
-      <button class="themebtn iconbtn" title="Toggle light / dark">☾</button>
-      <button class="iconbtn" title="Notifications">${I.bell}<span class="dot-badge"></span></button>
-    </div>
-  </div>
-
   <div class="card" style="padding:24px 22px;position:relative;overflow:hidden">
     <div class="streak-glow"></div>
     <div class="between" style="align-items:center;gap:14px">
@@ -602,7 +604,22 @@ function rankRow(pos,key,name,val,trend,medal,me){
     <span class="val" ${medal==='gold'?'style="color:var(--lime)"':''}>${val}</span>
   </div>`;
 }
-S.home=()=>`<div class="scroll">${homeBody()}</div>${tabbar('home')}`;
+S.home=()=>`
+<div class="scr-head" id="homeHead">
+  <div class="between">
+    <div class="row" style="gap:11px">
+      <div class="logo-mark">${I.bolt}</div>
+      <span class="wordmark">GymStreak</span>
+    </div>
+    <div class="row" style="gap:8px">
+      <button class="themebtn iconbtn" title="Toggle light / dark">☾</button>
+      <button class="iconbtn" title="Notifications">${I.bell}<span class="dot-badge"></span></button>
+      ${pfpBtn()}
+    </div>
+  </div>
+</div>
+<div class="scr-body" onscroll="onScrollHead(this)">${homeBody()}</div>
+${tabbar('home')}`;
 
 /* 3. ACTIVE SESSION */
 S.active=()=>`
@@ -662,49 +679,84 @@ S.complete=()=>`
   <button class="btn btn-dark" onclick="go('home')">Done</button>
 </div>`;
 
-/* 5. LEADERBOARD */
-const LB=[
-  ['jordan','Jordan Ruiz','8h 15m',['up','▲2']],
-  ['maya','Maya Chen','9h 40m',['dn','▼1']],
-  ['you','You','6h 45m',['up','▲1']],
-  ['priya','Priya Nair','7h 05m',['up','▲1']],
-  ['devon','Devon Clarke','5h 50m',['dn','▼2']],
-  ['marcus','Marcus Webb','6h 30m',['up','▲3']],
-  ['sofia','Sofia Almeida','4h 20m',['dn','▼1']],
-  ['liam','Liam O’Brien','3h 10m',['up','▲2']],
+/* 5. LEADERBOARD — data: [minutes, sessions] per week / month / all-time */
+const LBF=[
+  {k:'you',   n:'You',           w:[405,6], m:[1680,26], a:[12240,186], streak:21, t:['up','▲1']},
+  {k:'jordan',n:'Jordan Ruiz',   w:[495,6], m:[1920,28], a:[9800,142],  streak:41, t:['up','▲2']},
+  {k:'maya',  n:'Maya Chen',     w:[580,7], m:[2100,30], a:[11400,168], streak:23, t:['dn','▼1']},
+  {k:'priya', n:'Priya Nair',    w:[425,6], m:[1610,24], a:[7300,120],  streak:12, t:['up','▲1']},
+  {k:'devon', n:'Devon Clarke',  w:[350,5], m:[1500,22], a:[8600,132],  streak:18, t:['dn','▼2']},
+  {k:'marcus',n:'Marcus Webb',   w:[390,5], m:[1450,21], a:[6900,104],  streak:9,  t:['up','▲3']},
+  {k:'sofia', n:'Sofia Almeida', w:[260,4], m:[1180,18], a:[5200,88],   streak:8,  t:['dn','▼1']},
+  {k:'liam',  n:'Liam O’Brien',  w:[190,3], m:[900,14],  a:[4100,70],   streak:5,  t:['up','▲2']},
 ];
+let lbPeriod='week', lbMetric='time';
+const LB_PERIODS=[['week','This Week'],['month','This Month'],['all','All Time']];
+const LB_METRICS=[['time','Total Time'],['sessions','Sessions'],['streak','Longest Streak']];
+const fmtMin=min=>Math.floor(min/60)+'h '+String(min%60).padStart(2,'0')+'m';
+function lbValue(f){
+  if(lbMetric==='streak') return {n:f.streak, disp:f.streak+'d'};
+  const p = lbPeriod==='week'?f.w : lbPeriod==='month'?f.m : f.a;
+  if(lbMetric==='sessions') return {n:p[1], disp:''+p[1]};
+  return {n:p[0], disp:fmtMin(p[0])};
+}
+function setLbPeriod(p){ lbPeriod=p; renderBoard(); }
+function setLbMetric(m){ lbMetric=m; renderBoard(); }
+function renderBoard(){
+  const seg=document.getElementById('lbSeg'); if(!seg) return;
+  seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.p===lbPeriod));
+  document.querySelectorAll('#lbChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===lbMetric));
+  const ranked=LBF.map(f=>({f,v:lbValue(f)})).sort((a,b)=>b.v.n-a.v.n);
+  const t=ranked.slice(0,3);
+  const podium=`<div class="podium">${podCol(t[1],2)}${podCol(t[0],1)}${podCol(t[2],3)}</div>`;
+  const rows=ranked.map((r,i)=>lbRow(i+1,r.f,r.v.disp)).join('<div class="divider" style="margin:0 12px"></div>');
+  document.getElementById('lbContent').innerHTML = podium + `<div class="card" style="padding:6px;margin-top:14px">${rows}</div>`;
+}
+function podCol(e,rank){
+  const cls={1:'p1',2:'p2',3:'p3'}[rank], col={1:'var(--lime)',2:'var(--silver)',3:'var(--bronze)'}[rank];
+  const me=e.f.k==='you';
+  return `<div class="pod ${cls}">
+    <div style="position:relative">${avatar(e.f.k,rank===1?60:52)}${rank===1?'<div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:18px">👑</div>':''}</div>
+    <div class="plat"><div class="medal" style="color:${col}">${rank}</div>
+      <div class="pn"${me?' style="color:var(--t1)"':''}>${e.f.n.split(' ')[0]}</div>
+      <div class="pv"${rank===1?' style="color:var(--lime)"':''}>${e.v.disp}</div></div>
+  </div>`;
+}
+function lbRow(pos,f,disp){
+  const me=f.k==='you', click=me?'':` onclick="go('fprofile')"`;
+  return `<div class="rank ${me?'me':''}"${click} style="cursor:pointer">
+    <span class="pos">${pos}</span>${avatar(f.k,40)}
+    <div class="nm"><b>${f.n}</b>${me?'<span>that’s you</span>':''}</div>
+    ${f.t?`<span class="trend ${f.t[0]}">${f.t[1]}</span>`:''}
+    <span class="val"${pos===1?' style="color:var(--lime)"':''}>${disp}</span>
+  </div>`;
+}
 S.board=()=>`
-<div class="scroll">
-  <div class="between" style="margin-bottom:16px">
+<div class="scr-head">
+  <div class="between" style="margin-bottom:14px">
     <div class="h1" style="font-size:24px">Leaderboard</div>
-    <div class="pill" style="background:var(--raise);color:var(--t2)">8 friends</div>
+    ${pfpBtn()}
   </div>
-  <div class="seg" style="margin-bottom:12px">
-    <button class="on">This Week</button><button>This Month</button><button>All Time</button>
+  <div class="seg" id="lbSeg" style="margin-bottom:12px">
+    ${LB_PERIODS.map(p=>`<button data-p="${p[0]}" onclick="setLbPeriod('${p[0]}')">${p[1]}</button>`).join('')}
   </div>
-  <div class="chips" style="margin-bottom:18px">
-    <button class="chip on">Total Time</button><button class="chip">Sessions</button><button class="chip">Longest Streak</button>
+  <div class="chips" id="lbChips">
+    ${LB_METRICS.map(m=>`<button class="chip" data-m="${m[0]}" onclick="setLbMetric('${m[0]}')">${m[1]}</button>`).join('')}
   </div>
-
-  <div class="podium">
-    <div class="pod p2"><div>${avatar('maya',52)}</div><div class="plat"><div class="medal" style="color:var(--silver)">2</div><div class="pn">Maya</div><div class="pv">9h 40m</div></div></div>
-    <div class="pod p1"><div style="position:relative">${avatar('jordan',60)}<div style="position:absolute;-top:8px;top:-16px;left:50%;transform:translateX(-50%);font-size:18px">👑</div></div><div class="plat"><div class="medal" style="color:var(--lime)">1</div><div class="pn" style="color:var(--t1)">Jordan</div><div class="pv" style="color:var(--lime)">8h 15m</div></div></div>
-    <div class="pod p3"><div>${avatar('you',52)}</div><div class="plat"><div class="medal" style="color:var(--bronze)">3</div><div class="pn">You</div><div class="pv">6h 45m</div></div></div>
-  </div>
-
-  <div class="card" style="padding:6px;margin-top:14px">
-    ${LB.map((r,i)=>rankRow(i+1,r[0],r[1],r[2],r[3],null,r[0]==='you')).join('<div class="divider" style="margin:0 12px"></div>')}
-  </div>
+</div>
+<div class="scr-body" onscroll="onScrollHead(this)">
+  <div id="lbContent"></div>
   <p class="muted tny" style="text-align:center;margin-top:14px">Resets Monday 12:00 AM · winner gets bragging rights 🏆</p>
 </div>
 ${tabbar('board')}`;
 
 /* Leaderboard EMPTY (reachable via dock) */
 S.boardEmpty=()=>`
-<div class="scroll">
-  <div class="h1" style="font-size:24px;margin-bottom:16px">Leaderboard</div>
-  <div class="seg" style="margin-bottom:12px"><button class="on">This Week</button><button>This Month</button><button>All Time</button></div>
-  <div class="empty" style="margin-top:60px">
+<div class="scr-head">
+  <div class="between"><div class="h1" style="font-size:24px">Leaderboard</div>${pfpBtn()}</div>
+</div>
+<div class="scr-body">
+  <div class="empty" style="margin-top:50px">
     <div class="ico" style="color:var(--lime)">${I.board}</div>
     <div><div style="font-weight:700;font-size:17px;color:var(--t1)">No one to race yet</div>
     <p class="sub" style="margin-top:8px;max-width:250px">Add a few friends and your weekly rankings show up here — every session counts.</p></div>
@@ -757,10 +809,12 @@ S.fprofile=()=>`
 
 /* 7. FRIENDS */
 S.friends=()=>`
-<div class="scroll">
-  <div class="between" style="margin-bottom:16px"><div class="h1" style="font-size:24px">Friends</div>
-    <button class="backbtn" style="color:var(--lime)">${I.plus}</button></div>
-  <div class="card row" style="padding:0 14px;height:50px;gap:10px;margin-bottom:14px">${I.search}<span class="muted" style="font-size:15px">Search by @username</span></div>
+<div class="scr-head">
+  <div class="between" style="margin-bottom:14px"><div class="h1" style="font-size:24px">Friends</div>
+    <div class="row" style="gap:8px"><button class="iconbtn" style="color:var(--lime)" title="Add friend">${I.plus}</button>${pfpBtn()}</div></div>
+  <label class="searchbar" style="margin-top:0">${I.search}<input type="text" inputmode="search" placeholder="Search by @username" autocomplete="off"></label>
+</div>
+<div class="scr-body" onscroll="onScrollHead(this)">
   <div class="grid2" style="margin-bottom:22px">
     <button class="card" style="cursor:pointer;text-align:center;padding:16px 10px"><div style="font-size:22px">📇</div><div style="font-weight:600;font-size:13.5px;margin-top:8px">Invite contacts</div></button>
     <button class="card" style="cursor:pointer;text-align:center;padding:16px 10px"><div style="font-size:22px">🔗</div><div style="font-weight:600;font-size:13.5px;margin-top:8px">Share invite link</div></button>
@@ -787,7 +841,7 @@ function friendRow(f){
 }
 S.friendsEmpty=()=>`
 <div class="scroll">
-  <div class="h1" style="font-size:24px;margin-bottom:20px">Friends</div>
+  <div class="between" style="margin-bottom:20px"><div class="h1" style="font-size:24px">Friends</div>${pfpBtn()}</div>
   <div class="empty" style="margin-top:50px">
     <div class="ico" style="color:var(--lime)">${I.friends}</div>
     <div><div style="font-weight:700;font-size:17px;color:var(--t1)">Working out is better together</div>
@@ -808,9 +862,11 @@ const FEED=[
   {k:'you',n:'You',t:'5h ago',txt:'finished a <b>64 min</b> session at <b>Equinox Bowery</b>',react:{fire:7,muscle:4,clap:2}},
 ];
 S.feed=()=>`
-<div class="scroll">
-  <div class="between" style="margin-bottom:16px"><div class="h1" style="font-size:24px">Activity</div>
-    <div class="pill pill-live"><span class="dotlive"></span>2 live now</div></div>
+<div class="scr-head">
+  <div class="between"><div class="h1" style="font-size:24px">Activity</div>
+    <div class="row" style="gap:10px"><div class="pill pill-live"><span class="dotlive"></span>2 live</div>${pfpBtn()}</div></div>
+</div>
+<div class="scr-body" onscroll="onScrollHead(this)">
   <div style="display:flex;flex-direction:column;gap:12px">
     ${FEED.map((p,i)=>`
       <div class="card" ${p.milestone?'style="background:linear-gradient(180deg,rgba(212,255,63,.09),transparent);border-color:rgba(212,255,63,.28)"':''}>
@@ -833,8 +889,10 @@ S.feed=()=>`
 /* 9. PROFILE / SETTINGS */
 S.profile=()=>`
 <div class="scroll">
-  <div class="between" style="margin-bottom:20px"><div class="h1" style="font-size:24px">Profile</div>
-    <button class="backbtn">${I.bell}</button></div>
+  <div class="row" style="gap:12px;margin-bottom:20px">
+    <button class="backbtn" onclick="go(profileReturn)" title="Back">${I.back}</button>
+    <div class="h1" style="font-size:24px">Profile</div>
+  </div>
   <div class="card" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px">
     ${avatar('you',80)}
     <div class="h1" style="font-size:22px;margin:14px 0 2px">David DiMino</div>
@@ -870,8 +928,8 @@ S.profile=()=>`
   </div>
 
   <button class="btn btn-dark" style="margin:20px 0 10px">Edit profile</button>
-  <p class="muted tny" style="text-align:center">GymStreak v1.0 · Sign out</p>
-</div>${tabbar('profile')}`;
+  <p class="muted tny" style="text-align:center;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))">GymStreak v1.0 · Sign out</p>
+</div>`;
 function toggleRow(t,sub,on,last){
   return `<div class="between" style="padding:13px 0;${last?'':'border-bottom:1px solid var(--line)'}">
     <div><div style="font-size:14.5px;font-weight:500">${t}</div>${sub?`<div class="muted tny" style="margin-top:2px">${sub}</div>`:''}</div>
@@ -880,7 +938,7 @@ function toggleRow(t,sub,on,last){
 
 /* ============================ TAB BAR ============================ */
 function tabbar(active){
-  const tabs=[['home','Home',I.home],['board','Leaderboard',I.board],['feed','Activity',I.bolt],['friends','Friends',I.friends],['profile','Profile',I.person]];
+  const tabs=[['home','Home',I.home],['board','Leaderboard',I.board],['feed','Activity',I.bolt],['friends','Friends',I.friends]];
   return `<div class="tabbar">${tabs.map(t=>`<button class="tab ${t[0]===active?'on':''}" onclick="go('${t[0]}')">${t[2]}<span>${t[1]}</span></button>`).join('')}</div>`;
 }
 
@@ -917,9 +975,13 @@ function setDevBadge(){
 }
 function cycleDevBadge(){ devCorner=(devCorner+1)%DEV_CORNERS.length; setDevBadge(); }
 
+let profileReturn='home';
+function openProfile(){ if(current!=='profile') profileReturn=current; go('profile'); }
+const pfpBtn=()=>`<button class="pfp" onclick="openProfile()" title="Your profile">${avatar('you',38)}</button>`;
+
 function go(id){
   current=id;
-  const hasTab=['home','board','feed','friends','profile','boardEmpty','friendsEmpty'].includes(id);
+  const hasTab=['home','board','feed','friends','boardEmpty','friendsEmpty'].includes(id);
   vp.innerHTML=`<div class="screen active ${hasTab?'has-tab':''}">${S[id]()}</div>`;
   // light theme only meaningful on home
   phone.classList.toggle('light', lightMode && id==='home');
@@ -928,9 +990,11 @@ function go(id){
   const tb=vp.querySelector('.themebtn');
   if(tb){tb.textContent=lightMode?'☀':'☾';tb.onclick=()=>{lightMode=!lightMode;go('home');};}
   wireGym();
+  if(id==='board') renderBoard();
   vp.querySelector('.scroll')?.scrollTo(0,0);
   setDevBadge();
 }
+function onScrollHead(el){ const h=el.parentElement.querySelector('.scr-head'); if(h) h.classList.toggle('stuck', el.scrollTop>4); }
 let multiMode=false;
 let selectedGyms=new Set();
 function wireGym(){ syncGymUI(); } /* re-apply persisted selection to freshly rendered onboarding */
