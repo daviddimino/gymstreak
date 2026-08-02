@@ -194,6 +194,31 @@
   .rank .trend{font-size:11px;font-weight:700;display:flex;align-items:center;gap:2px}
   .up{color:var(--up)}.dn{color:var(--down)}
 
+  /* leaderboard Friends/Groups tabs */
+  .lb-tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:2px}
+  .lb-tabs button{flex:1;height:44px;background:none;border:none;cursor:pointer;position:relative;
+    font-family:var(--stat);font-weight:700;font-size:16.5px;letter-spacing:.01em;color:var(--t2)}
+  .lb-tabs button.on{color:var(--t1)}
+  .lb-tabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;border-radius:2px;background:var(--lime)}
+  /* group cards + opened-group header */
+  .group-emblem{width:52px;height:52px;flex:none;border-radius:15px;display:grid;place-items:center;
+    font-family:var(--stat);font-weight:800;font-size:19px;color:#0B0B0D}
+  .group-emblem.sm{width:40px;height:40px;border-radius:12px;font-size:15px}
+  .group-card{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px;margin-bottom:12px;
+    border-radius:16px;background:var(--card);border:1px solid var(--line);cursor:pointer;transition:border-color .15s,transform .1s}
+  .group-card:active{transform:scale(.99)}
+  .group-card>div>b{display:block;font-size:15.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .group-card .stack{display:flex;margin-top:9px}
+  .group-card .stack span{margin-left:-9px}
+  .group-card .stack span:first-child{margin-left:0}
+  .group-card .stack .av{box-shadow:0 0 0 2px var(--card)}
+  .group-meta{display:flex;align-items:center;gap:6px;flex:none}
+  .group-meta .grk{text-align:right}
+  .group-meta .grk b{font-family:var(--stat);font-weight:800;font-size:19px;display:block;line-height:1}
+  .group-meta .grk span{font-size:9.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em}
+  .group-meta svg{color:var(--t3)}
+  .lb-grouphead{display:flex;align-items:center;gap:12px;margin-top:12px}
+  .lb-grouphead b{font-size:16px;font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* podium */
   .podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;padding:6px 0 4px}
   .pod{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1}
@@ -860,8 +885,35 @@ const LBF=[
   {k:'liam',  n:'Liam O’Brien',  w:[190,3], m:[900,14],  a:[4100,70],   streak:5,  t:['up','▲2']},
 ];
 let lbPeriod='week', lbMetric='time';
+let lbTab='friends', lbGroup=null;   // top tabs: 'friends' | 'groups'; lbGroup = opened group id
 const LB_PERIODS=[['week','This Week'],['month','This Month'],['all','All Time']];
 const LB_METRICS=[['time','Total Time'],['sessions','Sessions'],['streak','Longest Streak']];
+/* STUB groups — real groups would carry their own roster + data; here members reference LBF keys */
+const GROUPS=[
+  {id:'chipsi',     name:'Chi Psi Fraternity',       sub:'42 members', emblem:'ΧΨ', color:'#8FB3FF', members:['you','jordan','marcus','liam','devon']},
+  {id:'earlybirds', name:'6 AM Early Birds',          sub:'23 members', emblem:'6A', color:'#FFB27A', members:['you','maya','priya','sofia']},
+  {id:'equinox',    name:'Equinox Bowery Regulars',   sub:'58 members', emblem:'EB', color:'#D4FF3F', members:['you','maya','jordan','sofia','devon']},
+];
+const groupById=id=>GROUPS.find(g=>g.id===id);
+function setLbTab(t){ lbTab=t; lbGroup=null; go('board'); }
+function openGroup(id){ lbGroup=id; go('board'); }
+function closeGroup(){ lbGroup=null; go('board'); }
+function groupRank(g){
+  const ranked=LBF.filter(f=>g.members.includes(f.k)).map(f=>({f,v:lbValue(f)})).sort((a,b)=>b.v.n-a.v.n);
+  const i=ranked.findIndex(r=>r.f.k==='you');
+  return i>=0 ? i+1 : null;
+}
+function groupCard(g){
+  const rank=groupRank(g), mem=g.members.slice(0,4);
+  return `<button class="group-card" onclick="openGroup('${g.id}')">
+    <div class="group-emblem" style="background:${g.color}">${g.emblem}</div>
+    <div style="flex:1;min-width:0">
+      <b>${g.name}</b><div class="muted tny">${g.sub}</div>
+      <div class="stack">${mem.map(k=>`<span>${avatar(k,26)}</span>`).join('')}</div>
+    </div>
+    <div class="group-meta">${rank?`<div class="grk"><b>#${rank}</b><span>your rank</span></div>`:''}${I.chev}</div>
+  </button>`;
+}
 const fmtMin=min=>Math.floor(min/60)+'h '+String(min%60).padStart(2,'0')+'m';
 function lbValue(f){
   if(lbMetric==='streak') return {n:f.streak, disp:f.streak+'d'};
@@ -872,14 +924,20 @@ function lbValue(f){
 function setLbPeriod(p){ lbPeriod=p; renderBoard(); }
 function setLbMetric(m){ lbMetric=m; renderBoard(); }
 function renderBoard(){
-  const seg=document.getElementById('lbSeg'); if(!seg) return;
-  seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.p===lbPeriod));
+  const content=document.getElementById('lbContent'); if(!content) return;
+  const seg=document.getElementById('lbSeg');
+  if(seg) seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.p===lbPeriod));
   document.querySelectorAll('#lbChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===lbMetric));
-  const ranked=LBF.map(f=>({f,v:lbValue(f)})).sort((a,b)=>b.v.n-a.v.n);
+  // groups tab, no group opened → show the tappable group list
+  if(lbTab==='groups' && !lbGroup){ content.innerHTML=GROUPS.map(groupCard).join(''); return; }
+  // otherwise a real leaderboard: all friends, or the opened group's members
+  const g=lbGroup?groupById(lbGroup):null;
+  const pool=g?LBF.filter(f=>g.members.includes(f.k)):LBF;
+  const ranked=pool.map(f=>({f,v:lbValue(f)})).sort((a,b)=>b.v.n-a.v.n);
   const t=ranked.slice(0,3);
-  const podium=`<div class="podium">${podCol(t[1],2)}${podCol(t[0],1)}${podCol(t[2],3)}</div>`;
+  const podium=ranked.length>=3?`<div class="podium">${podCol(t[1],2)}${podCol(t[0],1)}${podCol(t[2],3)}</div>`:'';
   const rows=ranked.map((r,i)=>lbRow(i+1,r.f,r.v.disp)).join('<div class="divider" style="margin:0 12px"></div>');
-  document.getElementById('lbContent').innerHTML = podium + `<div class="card" style="padding:6px;margin-top:14px">${rows}</div>`;
+  content.innerHTML = podium + `<div class="card" style="padding:6px;margin-top:14px">${rows}</div>`;
 }
 function podCol(e,rank){
   const cls={1:'p1',2:'p2',3:'p3'}[rank], col={1:'var(--lime)',2:'var(--silver)',3:'var(--bronze)'}[rank];
@@ -900,21 +958,39 @@ function lbRow(pos,f,disp){
     <span class="val"${pos===1?' style="color:var(--lime)"':''}>${disp}</span>
   </div>`;
 }
-S.board=()=>`
+S.board=()=>{
+  const g=lbGroup?groupById(lbGroup):null;
+  const showFilters=(lbTab==='friends')||(lbTab==='groups'&&g);   // filters only for an actual leaderboard
+  const groupList=(lbTab==='groups'&&!g);
+  const filters=`
+    <div class="seg" id="lbSeg" style="margin:12px 0 12px">
+      ${LB_PERIODS.map(p=>`<button data-p="${p[0]}" onclick="setLbPeriod('${p[0]}')">${p[1]}</button>`).join('')}
+    </div>
+    <div class="chips" id="lbChips">
+      ${LB_METRICS.map(m=>`<button class="chip" data-m="${m[0]}" onclick="setLbMetric('${m[0]}')">${m[1]}</button>`).join('')}
+    </div>`;
+  return `
 <div class="scr-head">
-  ${appHeader('<div class="h1" style="font-size:24px">Leaderboard</div>','14px')}
-  <div class="seg" id="lbSeg" style="margin-bottom:12px">
-    ${LB_PERIODS.map(p=>`<button data-p="${p[0]}" onclick="setLbPeriod('${p[0]}')">${p[1]}</button>`).join('')}
+  ${appHeader('<div class="h1" style="font-size:24px">Leaderboard</div>','12px')}
+  <div class="lb-tabs">
+    <button class="${lbTab==='friends'?'on':''}" onclick="setLbTab('friends')">Friends</button>
+    <button class="${lbTab==='groups'?'on':''}" onclick="setLbTab('groups')">Groups</button>
   </div>
-  <div class="chips" id="lbChips">
-    ${LB_METRICS.map(m=>`<button class="chip" data-m="${m[0]}" onclick="setLbMetric('${m[0]}')">${m[1]}</button>`).join('')}
-  </div>
+  ${g?`<div class="lb-grouphead">
+    <button class="backbtn" onclick="closeGroup()" title="All groups">${I.back}</button>
+    <div class="group-emblem sm" style="background:${g.color}">${g.emblem}</div>
+    <div style="flex:1;min-width:0"><b>${g.name}</b><div class="muted tny">${g.sub}</div></div>
+  </div>`:''}
+  ${showFilters?filters:''}
 </div>
 <div class="scr-body" onscroll="onScrollHead(this)">
+  ${groupList?`<div class="eyebrow" style="margin-bottom:12px">Your groups · ${GROUPS.length}</div>`:''}
   <div id="lbContent"></div>
-  <p class="muted tny" style="text-align:center;margin-top:14px">Resets Monday 12:00 AM · winner gets bragging rights 🏆</p>
+  ${showFilters?`<p class="muted tny" style="text-align:center;margin-top:14px">Resets Monday 12:00 AM · winner gets bragging rights 🏆</p>`:''}
+  ${groupList?`<button class="btn btn-dark" style="margin-top:14px" onclick="toast('Create or join a group (stub)')">${I.plus}Create or join a group</button>`:''}
 </div>
 ${tabbar('board')}`;
+};
 
 /* Leaderboard EMPTY (reachable via dock) */
 S.boardEmpty=()=>`
