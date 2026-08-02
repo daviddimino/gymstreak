@@ -22,7 +22,7 @@
     --t1:#F6F6F8; --t2:#9B9BA4; --t3:#66666E;
     --up:#3BE384; --down:#FF5D63;
     --gold:#F5C044; --silver:#C7CBD1; --bronze:#C98B54;
-    --stat:-apple-system,"SF Pro Display",system-ui,"Helvetica Neue",sans-serif;
+    --stat:"SF Pro Rounded",ui-rounded,-apple-system,"SF Pro Display",system-ui,sans-serif;
     --body:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif;
     --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
     --r:16px;
@@ -89,10 +89,10 @@
   .has-tab .scroll{padding-bottom:104px}
 
   /* ---------- typographic helpers ---------- */
-  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--t3);font-weight:700}
-  .h1{font-family:var(--stat);font-weight:800;letter-spacing:-.03em;font-size:28px;line-height:1.02}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--t3);font-weight:800}
+  .h1{font-family:var(--stat);font-weight:900;letter-spacing:-.02em;font-size:28px;line-height:1.02}
   .sub{color:var(--t2);font-size:14px;line-height:1.45}
-  .stat-num{font-family:var(--stat);font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:.92}
+  .stat-num{font-family:var(--stat);font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:.9}
   .muted{color:var(--t2)}
   .tny{font-size:12px}
 
@@ -100,7 +100,7 @@
   .btn{
     display:flex;align-items:center;justify-content:center;gap:9px;
     height:56px;border-radius:16px;border:none;width:100%;cursor:pointer;
-    font-family:var(--body);font-weight:700;font-size:16px;letter-spacing:-.01em;
+    font-family:var(--stat);font-weight:800;font-size:16.5px;letter-spacing:-.01em;
   }
   .btn-primary{background:var(--lime);color:var(--lime-ink);box-shadow:0 10px 30px -12px rgba(212,255,63,.6)}
   .btn-primary:disabled{background:var(--raise2);color:var(--t3);box-shadow:none;cursor:default}
@@ -157,11 +157,27 @@
   /* ---------- week strip ---------- */
   .week{display:flex;justify-content:space-between;gap:6px}
   .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
-  .day .lab{font-size:11px;color:var(--t3);font-weight:600}
-  .day .cell{width:100%;aspect-ratio:1;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center}
+  .day .lab{font-size:12px;color:var(--t3);font-weight:800}
+  .day .cell{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
   .day.hit .cell{background:var(--lime);border-color:var(--lime)}
-  .day.today .cell{border-color:var(--lime);border-width:2px}
+  .day.today .cell{border-color:var(--lime)}
+  .day.today .lab{color:var(--lime)}
   .day.hit .lab{color:var(--t1)}
+
+  /* home brand bar */
+  .logo-mark{width:36px;height:36px;flex:none;border-radius:11px;background:var(--lime);display:grid;place-items:center}
+  .logo-mark svg{width:21px;height:21px;color:#0B0B0D}
+  .wordmark{font-family:var(--stat);font-weight:900;font-size:22px;letter-spacing:-.02em}
+  .iconbtn{width:42px;height:42px;flex:none;border-radius:13px;background:var(--card);border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--t1);cursor:pointer;position:relative}
+  .iconbtn svg{width:21px;height:21px}
+  .dot-badge{position:absolute;top:9px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--lime);border:2px solid var(--card)}
+  .light .iconbtn{background:#fff;border-color:#E2E3E7;color:#0B0B0D}
+  /* streak hero */
+  .week-box{flex:none;text-align:center;border:1.5px solid var(--lime);border-radius:18px;padding:14px 18px;
+    background:rgba(212,255,63,.06)}
+  .streak-glow{position:absolute;right:-40px;top:-40px;width:200px;height:200px;
+    background:radial-gradient(circle,rgba(212,255,63,.16),transparent 68%);pointer-events:none}
 
   /* ---------- rank row ---------- */
   .rank{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:14px;border:1px solid transparent}
@@ -286,6 +302,7 @@
   .obm-foot .cnt b{color:var(--t1)}
   .backbtn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;color:var(--t1)}
   .light .h1,.light .stat-num{color:#0B0B0D}
+  .light .wordmark,.light .rank .nm b,.light .rank .val,.light .day.hit .lab{color:#0B0B0D}
   .light .eyebrow{color:#8A8B92}.light .sub,.light .muted{color:#55565E}
   .light .backbtn{background:#fff;border-color:#E2E3E7;color:#0B0B0D}
   .light .day .cell{border-color:#E4E5E9}
@@ -500,38 +517,40 @@ S.onboard=()=>`
 
 /* 2. HOME (theme-agnostic body; wrapper adds .has-tab) */
 function homeBody(){
-  const days=[['M',1],['T',1],['W',1],['T',1],['F',0,'today'],['S',0],['S',0]];
+  const days=[['M',1],['T',1],['W',0],['T',1,'today'],['F',1],['S',0],['S',0]];
+  const dayCheck=I.check.replace('width="22" height="22"','width="20" height="20"');
   return `
-  <div class="between" style="margin-bottom:20px">
-    <div><div class="eyebrow">Friday · Aug 1</div><div class="h1" style="margin-top:6px;font-size:24px">Hey, David</div></div>
-    <button class="themebtn backbtn" title="Toggle light / dark">☾</button>
+  <div class="between" style="margin-bottom:22px">
+    <div class="row" style="gap:11px">
+      <div class="logo-mark">${I.bolt}</div>
+      <span class="wordmark">GymStreak</span>
+    </div>
+    <div class="row" style="gap:9px">
+      <button class="themebtn iconbtn" title="Toggle light / dark">☾</button>
+      <button class="iconbtn" title="Notifications">${I.bell}<span class="dot-badge"></span></button>
+    </div>
   </div>
 
-  <div class="card" style="padding:22px;position:relative;overflow:hidden">
-    <div style="position:absolute;right:-30px;top:-30px;width:160px;height:160px;background:radial-gradient(circle,rgba(212,255,63,.14),transparent 70%)"></div>
-    <div class="between" style="align-items:flex-start">
-      <div>
-        <div class="eyebrow">Current streak</div>
-        <div class="row" style="align-items:flex-end;gap:10px;margin-top:6px">
-          <span class="stat-num flame" style="font-size:82px">14</span>
-          <span style="color:var(--lime);font-size:30px;margin-bottom:14px">${I.bolt}</span>
-        </div>
-        <div class="muted" style="font-size:13px;margin-top:-4px">days in a row · personal best is 21</div>
+  <div class="card" style="padding:24px 22px;position:relative;overflow:hidden">
+    <div class="streak-glow"></div>
+    <div class="between" style="align-items:center;gap:14px">
+      <div class="row" style="align-items:flex-start;gap:4px;min-width:0">
+        <span class="stat-num flame" style="font-size:92px;line-height:.8">14</span>
+        <span style="font-size:42px;margin-top:6px">🔥</span>
       </div>
-      <div class="pill pill-live" style="height:28px">🔥 On fire</div>
+      <div class="week-box">
+        <div class="stat-num" style="font-size:32px;color:var(--lime)">6.8<span style="font-size:17px">h</span></div>
+        <div class="eyebrow" style="margin-top:3px">This week</div>
+      </div>
     </div>
-    <div class="divider" style="margin:18px 0 14px"></div>
-    <div class="between">
-      <div><div class="eyebrow">This week</div><div class="stat-num" style="font-size:26px;margin-top:4px">6<span style="font-size:15px;color:var(--t2);font-weight:600">h</span> 45<span style="font-size:15px;color:var(--t2);font-weight:600">m</span></div></div>
-      <div style="text-align:right"><div class="eyebrow">Rank</div><div class="stat-num flame" style="font-size:26px;margin-top:4px">#3</div></div>
-    </div>
+    <div class="muted" style="font-size:14px;font-weight:700;margin-top:14px">day streak · Personal best: 21</div>
   </div>
 
-  <div style="margin:16px 0 8px" class="between">
-    <div class="eyebrow">Your week</div><span class="muted tny">4 of 7 days</span>
+  <div style="margin:18px 0 10px" class="between">
+    <div class="eyebrow">Your week</div><span class="muted tny" style="font-weight:700">4 of 7 days</span>
   </div>
   <div class="card"><div class="week">
-    ${days.map(([l,hit,t])=>`<div class="day ${hit?'hit':''} ${t||''}"><span class="lab">${l}</span><div class="cell">${hit?I.bolt.replace('24 24','24 24').replace('fill="currentColor"','fill="#0B0B0D"'):''}</div></div>`).join('')}
+    ${days.map(([l,hit,t])=>`<div class="day ${hit?'hit':''} ${t||''}"><span class="lab">${l}</span><div class="cell">${hit?dayCheck:''}</div></div>`).join('')}
   </div></div>
 
   <button class="btn btn-primary" style="margin:18px 0" onclick="go('active')">${I.bolt}Check in at Equinox Bowery</button>
