@@ -808,10 +808,16 @@ function go(id){
 let selectedGym=null;
 function wireGym(){ selectedGym=null; } /* onboarding freshly rendered; selection handled inline */
 function selectGym(el,i){
+  const cta=document.getElementById('obCta');
+  const already=el.classList.contains('sel');
   document.querySelectorAll('#obList .gymrow').forEach(r=>r.classList.remove('sel'));
+  if(already){ // tap the selected gym again to unselect
+    selectedGym=null;
+    cta.disabled=true; cta.textContent='Select a gym to continue';
+    return;
+  }
   el.classList.add('sel');
   selectedGym=GYMS[i];
-  const cta=document.getElementById('obCta');
   cta.disabled=false; cta.innerHTML=CHECK14+'This is my gym';
   el.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
