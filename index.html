@@ -139,13 +139,10 @@
   .chips::-webkit-scrollbar{height:0}
   .chip{flex:none;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);
     background:var(--card);color:var(--t2);font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer}
-  .chip.on{background:var(--lime);color:#0B0B0D;border-color:var(--lime)}
-
-  /* ---------- segmented ---------- */
-  .seg{display:flex;background:var(--raise);border:1px solid var(--line);border-radius:13px;padding:4px;gap:4px}
-  .seg button{flex:1;height:38px;border:none;background:transparent;color:var(--t2);font-family:var(--body);
-    font-weight:600;font-size:13.5px;border-radius:10px;cursor:pointer}
-  .seg button.on{background:var(--lime);color:#0B0B0D}
+  /* selected chip = thin lime outline + lime text on transparent (accent marks the user, not chrome) */
+  .chip.on{background:transparent;color:var(--lime);border-color:var(--lime)}
+  .chip:focus{outline:none}
+  .chip:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
 
   /* ---------- tab bar ---------- */
   .tabbar{
@@ -194,12 +191,23 @@
   .rank .trend{font-size:11px;font-weight:700;display:flex;align-items:center;gap:2px}
   .up{color:var(--up)}.dn{color:var(--down)}
 
-  /* leaderboard Friends/Groups tabs */
-  .lb-tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:2px}
-  .lb-tabs button{flex:1;height:44px;background:none;border:none;cursor:pointer;position:relative;
-    font-family:var(--stat);font-weight:700;font-size:16.5px;letter-spacing:.01em;color:var(--t2)}
-  .lb-tabs button.on{color:var(--t1)}
-  .lb-tabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;border-radius:2px;background:var(--lime)}
+  /* leaderboard audience dropdown (Friends / Groups / …) */
+  .lb-aud-wrap{position:relative;flex:none}
+  .lb-aud{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px 0 12px;border-radius:10px;
+    background:var(--raise);border:1px solid var(--line);color:var(--t1);font-family:var(--stat);font-weight:700;font-size:14.5px;cursor:pointer}
+  .lb-aud svg{color:var(--t2)}
+  .lb-aud:focus{outline:none}.lb-aud:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+  .lb-audmenu{position:absolute;top:calc(100% + 6px);left:0;min-width:150px;background:var(--card);border:1px solid var(--line2);
+    border-radius:12px;padding:6px;display:none;flex-direction:column;gap:2px;z-index:30;box-shadow:0 16px 40px -12px #000}
+  .lb-audmenu.open{display:flex}
+  .lb-audmenu button{text-align:left;height:40px;padding:0 12px;border-radius:8px;border:none;background:none;
+    color:var(--t1);font-family:var(--body);font-weight:600;font-size:14.5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .lb-audmenu button.on{color:var(--lime)}
+  .lb-audmenu button.on::after{content:"✓"}
+  /* pinned self row when it scrolls out of the list (opaque backdrop, keeps the .me lime tint) */
+  .lb-pinned{position:sticky;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:5;margin-top:12px;
+    background:var(--bg);border-radius:15px;box-shadow:0 12px 30px -8px #000}
+  .lb-pinned .rank{border:1px solid rgba(212,255,63,.55)}
   /* group cards + opened-group header */
   .group-emblem{width:52px;height:52px;flex:none;border-radius:15px;display:grid;place-items:center;
     font-family:var(--stat);font-weight:800;font-size:19px;color:#0B0B0D}
@@ -884,10 +892,12 @@ const LBF=[
   {k:'sofia', n:'Sofia Almeida', w:[260,4], m:[1180,18], a:[5200,88],   streak:8,  t:['dn','▼1']},
   {k:'liam',  n:'Liam O’Brien',  w:[190,3], m:[900,14],  a:[4100,70],   streak:5,  t:['up','▲2']},
 ];
-let lbPeriod='week', lbMetric='time';
-let lbTab='friends', lbGroup=null;   // top tabs: 'friends' | 'groups'; lbGroup = opened group id
-const LB_PERIODS=[['week','This Week'],['month','This Month'],['all','All Time']];
-const LB_METRICS=[['time','Total Time'],['sessions','Sessions'],['streak','Longest Streak']];
+let lbMetric='time';
+let lbTab='friends', lbGroup=null;   // audience: 'friends' | 'groups'; lbGroup = opened group id
+/* Audience options live in a list so more can be added later (e.g. a per-gym board) w/o redesign */
+const LB_AUDIENCES=[{id:'friends',label:'Friends'},{id:'groups',label:'Groups'}];
+const LB_METRICS=[['time','Total Time'],['sessions','Sessions'],['streak','Streak']];
+const CHEV_DOWN='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 /* STUB groups — real groups would carry their own roster + data; here members reference LBF keys */
 const GROUPS=[
   {id:'chipsi',     name:'Chi Psi Fraternity',       sub:'42 members', emblem:'ΧΨ', color:'#8FB3FF', members:['you','jordan','marcus','liam','devon']},
@@ -895,7 +905,19 @@ const GROUPS=[
   {id:'equinox',    name:'Equinox Bowery Regulars',   sub:'58 members', emblem:'EB', color:'#D4FF3F', members:['you','maya','jordan','sofia','devon']},
 ];
 const groupById=id=>GROUPS.find(g=>g.id===id);
-function setLbTab(t){ lbTab=t; lbGroup=null; go('board'); }
+/* audience dropdown (replaces the old Friends/Groups tab row) */
+function audienceDropdown(){
+  const cur=(LB_AUDIENCES.find(a=>a.id===lbTab)||LB_AUDIENCES[0]).label;
+  return `<div class="lb-aud-wrap">
+    <button class="lb-aud" onclick="toggleAud(event)">${cur}${CHEV_DOWN}</button>
+    <div class="lb-audmenu" id="lbAudMenu">
+      ${LB_AUDIENCES.map(a=>`<button class="${a.id===lbTab?'on':''}" onclick="setLbAudience('${a.id}')">${a.label}</button>`).join('')}
+    </div>
+  </div>`;
+}
+function toggleAud(e){ e.stopPropagation(); const m=document.getElementById('lbAudMenu'); if(m.classList.toggle('open')) setTimeout(()=>document.addEventListener('click',closeAud,{once:true}),0); }
+function closeAud(){ document.getElementById('lbAudMenu')?.classList.remove('open'); }
+function setLbAudience(id){ lbTab=id; lbGroup=null; closeAud(); go('board'); }
 function openGroup(id){ lbGroup=id; go('board'); }
 function closeGroup(){ lbGroup=null; go('board'); }
 function groupRank(g){
@@ -915,29 +937,39 @@ function groupCard(g){
   </button>`;
 }
 const fmtMin=min=>Math.floor(min/60)+'h '+String(min%60).padStart(2,'0')+'m';
+/* leaderboard is always weekly; Streak shows the all-time streak */
 function lbValue(f){
-  if(lbMetric==='streak') return {n:f.streak, disp:f.streak+'d'};
-  const p = lbPeriod==='week'?f.w : lbPeriod==='month'?f.m : f.a;
-  if(lbMetric==='sessions') return {n:p[1], disp:''+p[1]};
-  return {n:p[0], disp:fmtMin(p[0])};
+  if(lbMetric==='streak')   return {n:f.streak, disp:f.streak+'d'};   // all-time
+  if(lbMetric==='sessions') return {n:f.w[1],   disp:''+f.w[1]};      // this week
+  return {n:f.w[0], disp:fmtMin(f.w[0])};                             // this week total time
 }
-function setLbPeriod(p){ lbPeriod=p; renderBoard(); }
 function setLbMetric(m){ lbMetric=m; renderBoard(); }
+let lbPinObs=null;
+function teardownPin(){ if(lbPinObs){lbPinObs.disconnect();lbPinObs=null;} const p=document.getElementById('lbPinned'); if(p){p.style.display='none';p.innerHTML='';} }
+function setupPin(ranked){
+  teardownPin();
+  const idx=ranked.findIndex(r=>r.f.k==='you'); if(idx<0) return;
+  const pinned=document.getElementById('lbPinned'), scroller=document.querySelector('.scr-body');
+  const realRow=[...document.querySelectorAll('#lbContent .rank.me')][0];
+  if(!pinned||!scroller||!realRow) return;
+  pinned.innerHTML=lbRow(idx+1, ranked[idx].f, ranked[idx].v.disp);   // reuses the shared .rank.me highlight
+  lbPinObs=new IntersectionObserver(es=>{ pinned.style.display = es[0].isIntersecting ? 'none':'block'; },{root:scroller,threshold:0.6});
+  lbPinObs.observe(realRow);
+}
 function renderBoard(){
   const content=document.getElementById('lbContent'); if(!content) return;
-  const seg=document.getElementById('lbSeg');
-  if(seg) seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.p===lbPeriod));
   document.querySelectorAll('#lbChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===lbMetric));
-  // groups tab, no group opened → show the tappable group list
-  if(lbTab==='groups' && !lbGroup){ content.innerHTML=GROUPS.map(groupCard).join(''); return; }
-  // otherwise a real leaderboard: all friends, or the opened group's members
+  // groups audience, no group opened → tappable group list
+  if(lbTab==='groups' && !lbGroup){ content.innerHTML=GROUPS.map(groupCard).join(''); teardownPin(); return; }
   const g=lbGroup?groupById(lbGroup):null;
   const pool=g?LBF.filter(f=>g.members.includes(f.k)):LBF;
   const ranked=pool.map(f=>({f,v:lbValue(f)})).sort((a,b)=>b.v.n-a.v.n);
+  const showPodium=ranked.length>=6;   // a 3-person podium is meaningless with few participants
   const t=ranked.slice(0,3);
-  const podium=ranked.length>=3?`<div class="podium">${podCol(t[1],2)}${podCol(t[0],1)}${podCol(t[2],3)}</div>`:'';
+  const podium=showPodium?`<div class="podium">${podCol(t[1],2)}${podCol(t[0],1)}${podCol(t[2],3)}</div>`:'';
   const rows=ranked.map((r,i)=>lbRow(i+1,r.f,r.v.disp)).join('<div class="divider" style="margin:0 12px"></div>');
-  content.innerHTML = podium + `<div class="card" style="padding:6px;margin-top:14px">${rows}</div>`;
+  content.innerHTML = podium + `<div class="card" style="padding:6px;margin-top:${showPodium?'14px':'2px'}">${rows}</div>`;
+  setupPin(ranked);   // pin the user's row to the bottom when it scrolls out of view
 }
 function podCol(e,rank){
   const cls={1:'p1',2:'p2',3:'p3'}[rank], col={1:'var(--lime)',2:'var(--silver)',3:'var(--bronze)'}[rank];
@@ -958,35 +990,29 @@ function lbRow(pos,f,disp){
     <span class="val"${pos===1?' style="color:var(--lime)"':''}>${disp}</span>
   </div>`;
 }
+function boardHeaderLeft(){
+  return `<div style="min-width:0"><div class="h1" style="font-size:24px">Leaderboard</div><div class="eyebrow" style="margin-top:3px">This week</div></div>`+audienceDropdown();
+}
 S.board=()=>{
   const g=lbGroup?groupById(lbGroup):null;
-  const showFilters=(lbTab==='friends')||(lbTab==='groups'&&g);   // filters only for an actual leaderboard
   const groupList=(lbTab==='groups'&&!g);
-  const filters=`
-    <div class="seg" id="lbSeg" style="margin:12px 0 12px">
-      ${LB_PERIODS.map(p=>`<button data-p="${p[0]}" onclick="setLbPeriod('${p[0]}')">${p[1]}</button>`).join('')}
-    </div>
-    <div class="chips" id="lbChips">
+  const chips=`<div class="chips" id="lbChips" style="margin-top:12px">
       ${LB_METRICS.map(m=>`<button class="chip" data-m="${m[0]}" onclick="setLbMetric('${m[0]}')">${m[1]}</button>`).join('')}
     </div>`;
   return `
 <div class="scr-head">
-  ${appHeader('<div class="h1" style="font-size:24px">Leaderboard</div>','12px')}
-  <div class="lb-tabs">
-    <button class="${lbTab==='friends'?'on':''}" onclick="setLbTab('friends')">Friends</button>
-    <button class="${lbTab==='groups'?'on':''}" onclick="setLbTab('groups')">Groups</button>
-  </div>
+  ${appHeader(boardHeaderLeft(),'0')}
   ${g?`<div class="lb-grouphead">
     <button class="backbtn" onclick="closeGroup()" title="All groups">${I.back}</button>
     <div class="group-emblem sm" style="background:${g.color}">${g.emblem}</div>
     <div style="flex:1;min-width:0"><b>${g.name}</b><div class="muted tny">${g.sub}</div></div>
   </div>`:''}
-  ${showFilters?filters:''}
+  ${groupList?'':chips}
 </div>
 <div class="scr-body" onscroll="onScrollHead(this)">
   ${groupList?`<div class="eyebrow" style="margin-bottom:12px">Your groups · ${GROUPS.length}</div>`:''}
   <div id="lbContent"></div>
-  ${showFilters?`<p class="muted tny" style="text-align:center;margin-top:14px">Resets Monday 12:00 AM · winner gets bragging rights 🏆</p>`:''}
+  <div class="lb-pinned" id="lbPinned" style="display:none"></div>
   ${groupList?`<button class="btn btn-dark" style="margin-top:14px" onclick="toast('Create or join a group (stub)')">${I.plus}Create or join a group</button>`:''}
 </div>
 ${tabbar('board')}`;
