@@ -248,6 +248,42 @@
   .light .ob-head,.light .ob-foot{background:#F4F5F7}
   .light .searchbar{background:#fff;border-color:#E4E5E9}
   .light .gymrow{background:#fff;border-color:#E7E8EC}
+  /* controls row: multi-select toggle + map button */
+  .ob-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+  .multi-toggle{display:flex;align-items:center;gap:11px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--t2)}
+  .multi-toggle .sw{transform:scale(.82);transform-origin:left center}
+  .map-btn{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 16px 0 13px;border-radius:12px;
+    background:var(--raise);border:1px solid var(--line);color:var(--t1);font-family:var(--body);font-weight:600;font-size:14px;cursor:pointer}
+  .map-btn svg{color:var(--lime)}
+  .ob-list.multi .gymrow .radio{border-radius:8px}
+  /* map picker overlay */
+  .ob-map{position:absolute;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column}
+  .ob-map.open{display:flex}
+  .obm-head{flex:none;display:flex;align-items:center;gap:13px;padding:var(--top-inset) 20px 13px;border-bottom:1px solid var(--line)}
+  .obm-head .ttl{flex:1;min-width:0}
+  .obm-head .ttl b{display:block;font-size:17px;font-weight:700}
+  .obm-head .ttl span{font-size:12px;color:var(--t2)}
+  .mapwrap{flex:1;position:relative;overflow:hidden;background:#0e1013}
+  .mapwrap svg.base{position:absolute;inset:0;width:100%;height:100%}
+  .map-badge{position:absolute;left:46%;top:60%;transform:translate(6px,-26px);font-size:10.5px;font-weight:700;
+    color:#9cc2ff;background:rgba(11,11,13,.72);padding:2px 7px;border-radius:6px;pointer-events:none;z-index:2}
+  .you-dot{position:absolute;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;
+    background:#5EA0FF;border:3px solid #0B0B0D;box-shadow:0 0 0 4px rgba(94,160,255,.22);z-index:1}
+  .pin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:4px;
+    background:none;border:none;cursor:pointer;z-index:2;padding:0}
+  .pin .mk{width:30px;height:30px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);
+    background:var(--card);border:1.5px solid var(--line2);display:grid;place-items:center;transition:.15s;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+  .pin .mk i{width:9px;height:9px;border-radius:50%;background:var(--t2);transform:rotate(-45deg);transition:.15s}
+  .pin .lab{font-size:10.5px;font-weight:700;color:var(--t2);background:rgba(11,11,13,.72);
+    padding:1px 6px;border-radius:6px;white-space:nowrap;transition:.15s}
+  .pin.on{z-index:6}
+  .pin.on .mk{background:var(--lime);border-color:var(--lime);transform:rotate(45deg) scale(1.14)}
+  .pin.on .mk i{background:#0B0B0D;width:11px;height:11px}
+  .pin.on .lab{color:#0B0B0D;background:var(--lime)}
+  .obm-foot{flex:none;display:flex;align-items:center;gap:14px;background:var(--bg);border-top:1px solid var(--line);
+    padding:14px 20px calc(18px + env(safe-area-inset-bottom,0px))}
+  .obm-foot .cnt{flex:1;font-size:14px;color:var(--t2);font-weight:600}
+  .obm-foot .cnt b{color:var(--t1)}
   .backbtn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;color:var(--t1)}
   .light .h1,.light .stat-num{color:#0B0B0D}
   .light .eyebrow{color:#8A8B92}.light .sub,.light .muted{color:#55565E}
@@ -381,6 +417,24 @@ const GYMS=[
   {n:'Life Time Sky',          a:'605 W 42nd St, New York',  d:'3.1 mi'},
 ];
 const CHECK14=I.check.replace('width="22" height="22"','width="15" height="15"');
+/* pin positions (% of map) per GYMS index, with a short label */
+const PINS=[[46,54,'Equinox'],[29,40,'Barry’s'],[63,36,'Blink'],[19,66,'Chelsea Piers'],
+            [71,61,'Crunch'],[40,26,'Planet'],[55,73,'Rumble'],[81,46,'Life Time']];
+const MAP_SVG=`<svg class="base" viewBox="0 0 350 470" preserveAspectRatio="xMidYMid slice" fill="none">
+  <rect width="350" height="470" fill="#0e1013"/>
+  <path d="M300 -20 350 30 250 490 185 490Z" fill="#122135" opacity=".85"/>
+  <rect x="42" y="252" width="88" height="78" rx="10" fill="#16301f"/>
+  <g fill="#161a20">
+    <rect x="18" y="26" width="80" height="60" rx="7"/><rect x="122" y="26" width="88" height="60" rx="7"/><rect x="232" y="26" width="58" height="60" rx="7"/>
+    <rect x="18" y="112" width="80" height="66" rx="7"/><rect x="122" y="112" width="88" height="66" rx="7"/>
+    <rect x="150" y="204" width="120" height="86" rx="7"/>
+    <rect x="18" y="352" width="108" height="90" rx="7"/><rect x="150" y="312" width="108" height="130" rx="7"/>
+  </g>
+  <g stroke="#23282f" stroke-width="6" stroke-linecap="round">
+    <path d="M0 100H350"/><path d="M0 192H350"/><path d="M0 302H350"/><path d="M0 344H150"/>
+    <path d="M110 0V470"/><path d="M222 0V470"/><path d="M140 192V470"/>
+  </g>
+</svg>`;
 S.onboard=()=>`
 <div class="ob">
   <div class="ob-head" id="obHead">
@@ -393,11 +447,17 @@ S.onboard=()=>`
              placeholder="Search gyms or neighborhoods" oninput="filterGyms(this.value)">
       <button class="clr" onclick="clearGymSearch()" aria-label="Clear search">✕</button>
     </label>
+    <div class="ob-controls">
+      <div class="multi-toggle" onclick="toggleMulti()">
+        <span class="sw" id="multiSw"></span><span>Select multiple</span>
+      </div>
+      <button class="map-btn" onclick="openGymMap()">${I.pin}Map</button>
+    </div>
   </div>
   <div class="ob-list" id="obList" onscroll="onObScroll(this)">
     <div class="gcount" id="gcount">${GYMS.length} gyms near you</div>
     ${GYMS.map((g,i)=>`
-      <button class="gymrow" data-find="${(g.n+' '+g.a).toLowerCase()}" onclick="selectGym(this,${i})">
+      <button class="gymrow" data-i="${i}" data-find="${(g.n+' '+g.a).toLowerCase()}" onclick="toggleGym(${i})">
         <div class="thumb">${mapThumb(i)}</div>
         <div class="ginfo">
           <b>${g.n}</b>
@@ -414,6 +474,27 @@ S.onboard=()=>`
   </div>
   <div class="ob-foot">
     <button class="btn btn-primary" id="obCta" onclick="confirmGym()" disabled>Select a gym to continue</button>
+  </div>
+
+  <!-- map picker overlay -->
+  <div class="ob-map" id="obMap">
+    <div class="obm-head">
+      <button class="backbtn" onclick="closeGymMap()">${I.back}</button>
+      <div class="ttl"><b>Gyms near you</b><span>Tap a pin to select · East Village, NYC</span></div>
+    </div>
+    <div class="mapwrap">
+      ${MAP_SVG}
+      <div class="you-dot" style="left:46%;top:60%"></div>
+      ${PINS.map((p,i)=>`
+        <button class="pin" data-pin="${i}" style="left:${p[0]}%;top:${p[1]}%" onclick="toggleGym(${i})">
+          <span class="mk"><i></i></span><span class="lab">${p[2]}</span>
+        </button>`).join('')}
+      <div class="map-badge">You are here</div>
+    </div>
+    <div class="obm-foot">
+      <div class="cnt" id="mapCount">Tap pins to add gyms</div>
+      <button class="btn btn-primary" style="width:auto;padding:0 24px;height:48px" onclick="closeGymMap()">Done</button>
+    </div>
   </div>
 </div>`;
 
@@ -805,23 +886,34 @@ function go(id){
   wireGym();
   vp.querySelector('.scroll')?.scrollTo(0,0);
 }
-let selectedGym=null;
-function wireGym(){ selectedGym=null; } /* onboarding freshly rendered; selection handled inline */
-function selectGym(el,i){
-  const cta=document.getElementById('obCta');
-  const already=el.classList.contains('sel');
-  document.querySelectorAll('#obList .gymrow').forEach(r=>r.classList.remove('sel'));
-  if(already){ // tap the selected gym again to unselect
-    selectedGym=null;
-    cta.disabled=true; cta.textContent='Select a gym to continue';
-    return;
-  }
-  el.classList.add('sel');
-  selectedGym=GYMS[i];
-  cta.disabled=false; cta.innerHTML=CHECK14+'This is my gym';
-  el.scrollIntoView({block:'nearest',behavior:'smooth'});
+let multiMode=false;
+let selectedGyms=new Set();
+function wireGym(){ syncGymUI(); } /* re-apply persisted selection to freshly rendered onboarding */
+function toggleGym(i){
+  if(selectedGyms.has(i)) selectedGyms.delete(i);        // tap again to deselect (both modes)
+  else { if(!multiMode) selectedGyms.clear(); selectedGyms.add(i); }
+  syncGymUI();
 }
-function confirmGym(){ if(selectedGym) go('home'); }
+function toggleMulti(){
+  multiMode=!multiMode;
+  if(!multiMode && selectedGyms.size>1) selectedGyms=new Set([Math.min(...selectedGyms)]); // collapse to one
+  syncGymUI();
+}
+function syncGymUI(){
+  if(!document.getElementById('obList')) return;
+  const sw=document.getElementById('multiSw'); if(sw) sw.classList.toggle('on',multiMode);
+  document.getElementById('obList').classList.toggle('multi',multiMode);
+  document.querySelectorAll('#obList .gymrow').forEach(r=>r.classList.toggle('sel',selectedGyms.has(+r.dataset.i)));
+  document.querySelectorAll('#obMap .pin').forEach(p=>p.classList.toggle('on',selectedGyms.has(+p.dataset.pin)));
+  const n=selectedGyms.size, cta=document.getElementById('obCta');
+  if(n===0){ cta.disabled=true; cta.textContent='Select a gym to continue'; }
+  else { cta.disabled=false; cta.innerHTML=CHECK14+(n===1?'This is my gym':`Save ${n} gyms`); }
+  const mc=document.getElementById('mapCount');
+  if(mc) mc.innerHTML = n ? `<b>${n}</b> gym${n>1?'s':''} selected` : 'Tap pins to add gyms';
+}
+function openGymMap(){ document.getElementById('obMap').classList.add('open'); syncGymUI(); }
+function closeGymMap(){ document.getElementById('obMap').classList.remove('open'); }
+function confirmGym(){ if(selectedGyms.size) go('home'); }
 function filterGyms(q){
   q=q.trim().toLowerCase();
   document.getElementById('searchbar').classList.toggle('has-val', q.length>0);
