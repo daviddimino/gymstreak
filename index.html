@@ -26,6 +26,7 @@
     --body:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif;
     --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
     --r:16px;
+    --top-inset:60px; /* cleared above the fake status bar; overridden with safe-area in app build */
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -102,6 +103,7 @@
     font-family:var(--body);font-weight:700;font-size:16px;letter-spacing:-.01em;
   }
   .btn-primary{background:var(--lime);color:var(--lime-ink);box-shadow:0 10px 30px -12px rgba(212,255,63,.6)}
+  .btn-primary:disabled{background:var(--raise2);color:var(--t3);box-shadow:none;cursor:default}
   .btn-primary:active{transform:translateY(1px)}
   .btn-ghost{background:transparent;color:var(--t1);border:1px solid var(--line2)}
   .btn-dark{background:var(--raise);color:var(--t1);border:1px solid var(--line)}
@@ -204,6 +206,48 @@
   .empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:40px 24px;color:var(--t2)}
   .empty .ico{width:66px;height:66px;border-radius:20px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
   .empty .ico svg{width:30px;height:30px}
+
+  /* ---------- onboarding (frozen header + footer, scrollable list) ---------- */
+  .ob{flex:1;min-height:0;display:flex;flex-direction:column}
+  .ob-head{flex:none;padding:var(--top-inset) 20px 14px;background:var(--bg);z-index:5;
+    border-bottom:1px solid transparent;transition:border-color .2s}
+  .ob-head.scrolled{border-bottom-color:var(--line)}
+  .ob-list{flex:1;min-height:0;overflow-y:auto;padding:8px 20px 22px}
+  .ob-list::-webkit-scrollbar{width:0}
+  .ob-foot{flex:none;padding:14px 20px calc(24px + env(safe-area-inset-bottom,0px));
+    background:linear-gradient(to top,var(--bg) 74%,transparent)}
+  .searchbar{display:flex;align-items:center;gap:10px;height:52px;padding:0 8px 0 14px;margin-top:16px;
+    border-radius:14px;background:var(--raise);border:1px solid var(--line);transition:border-color .15s}
+  .searchbar:focus-within{border-color:var(--line2)}
+  .searchbar svg{flex:none;color:var(--t3)}
+  .searchbar input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--t1);
+    font-family:var(--body);font-size:16px;caret-color:var(--lime)}
+  .searchbar input::placeholder{color:var(--t3)}
+  .searchbar .clr{display:none;width:30px;height:30px;flex:none;border:none;border-radius:8px;cursor:pointer;
+    background:var(--raise2);color:var(--t2);font-size:13px}
+  .searchbar.has-val .clr{display:block}
+  .gcount{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);font-weight:700;margin:6px 2px 12px}
+  .gymrow{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px;margin-bottom:10px;
+    border-radius:16px;background:var(--card);border:1px solid var(--line);cursor:pointer;
+    transition:border-color .15s,background .15s,transform .1s}
+  .gymrow:active{transform:scale(.99)}
+  .gymrow .thumb{width:56px;height:56px;flex:none;border-radius:13px;overflow:hidden;background:var(--raise)}
+  .gymrow .ginfo{flex:1;min-width:0}
+  .gymrow .ginfo b{display:block;font-size:15.5px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gymrow .ginfo .adr{font-size:13px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .gymrow .ginfo .dist{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--t3);font-weight:600;margin-top:7px}
+  .gymrow .radio{width:24px;height:24px;flex:none;border-radius:50%;border:2px solid var(--line2);
+    display:grid;place-items:center;transition:.15s}
+  .gymrow .radio svg{opacity:0;transition:opacity .12s}
+  .gymrow.sel{border-color:var(--lime);background:rgba(212,255,63,.06)}
+  .gymrow.sel .radio{background:var(--lime);border-color:var(--lime)}
+  .gymrow.sel .radio svg{opacity:1}
+  .gymrow.hidden{display:none}
+  .gym-empty{text-align:center;color:var(--t2);padding:34px 20px;font-size:13.5px;line-height:1.5}
+  .gym-empty b{color:var(--t1);display:block;margin-bottom:6px;font-size:15px}
+  .light .ob-head,.light .ob-foot{background:#F4F5F7}
+  .light .searchbar{background:#fff;border-color:#E4E5E9}
+  .light .gymrow{background:#fff;border-color:#E7E8EC}
   .backbtn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;color:var(--t1)}
   .light .h1,.light .stat-num{color:#0B0B0D}
   .light .eyebrow{color:#8A8B92}.light .sub,.light .muted{color:#55565E}
@@ -232,6 +276,7 @@
 <style id="appmode">
   /* ---- installed-app / mobile-first overrides ---- */
   html{background:#050506}
+  :root{--top-inset:calc(env(safe-area-inset-top,0px) + 16px)}
   body{padding:0!important;margin:0;min-height:100vh;min-height:100dvh;background:var(--bg)!important;
        display:block;overscroll-behavior:none}
   .studio,.dock,.island,.status{display:none!important}
@@ -295,10 +340,20 @@ const I={
   plus:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
   bell:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
 };
-/* mini map thumbnail (procedural) */
+/* mini map thumbnail (procedural, self-rounding, fills its container) */
 function mapThumb(seed){
-  const c=['#20242b','#232830','#1d2128'][seed%3];
-  return `<svg width="58" height="58" viewBox="0 0 58 58"><rect width="58" height="58" rx="12" fill="${c}"/><path d="M-4 ${14+seed*3}h66M-4 ${40-seed*2}h66" stroke="#3a4048" stroke-width="6"/><path d="M${12+seed*4} -4v66M${42-seed*3} -4v66" stroke="#31363e" stroke-width="5"/><circle cx="29" cy="29" r="6" fill="#D4FF3F"/><circle cx="29" cy="29" r="6" fill="none" stroke="#0B0B0D" stroke-width="1.5"/></svg>`;
+  const base=['#191d24','#1c2027','#171b21'][seed%3];
+  const ox=6*((seed%3)-1), oy=(seed%2?5:-5);
+  return `<svg width="100%" height="100%" viewBox="0 0 56 56" preserveAspectRatio="xMidYMid slice" fill="none">
+    <defs><clipPath id="m${seed}"><rect width="56" height="56" rx="13"/></clipPath></defs>
+    <g clip-path="url(#m${seed})">
+      <rect width="56" height="56" fill="${base}"/>
+      <path d="M-6 ${21+oy}H62" stroke="#2b323c" stroke-width="7"/>
+      <path d="M-6 ${39+oy}H62" stroke="#232932" stroke-width="4"/>
+      <path d="M${19+ox} -6V62" stroke="#262c35" stroke-width="6"/>
+      <circle cx="28" cy="28" r="9" fill="#D4FF3F" opacity=".16"/>
+      <circle cx="28" cy="28" r="4.6" fill="#D4FF3F" stroke="#0B0B0D" stroke-width="1.6"/>
+    </g></svg>`;
 }
 
 const FRIENDS=[
@@ -316,40 +371,50 @@ const S={};
 
 /* 1. ONBOARDING */
 const GYMS=[
-  {n:'Equinox Bowery',        a:'6 Cooper Sq, New York',      d:'0.3 mi'},
-  {n:'Barry’s SoHo',          a:'110 Greene St, New York',    d:'0.6 mi'},
-  {n:'Blink Fitness Union Sq',a:'4 Union Sq E, New York',     d:'0.8 mi'},
-  {n:'Chelsea Piers Fitness', a:'Pier 60, Chelsea',           d:'1.4 mi'},
-  {n:'Crunch Lafayette',      a:'623 Broadway, New York',     d:'1.7 mi'},
+  {n:'Equinox Bowery',         a:'6 Cooper Sq, New York',    d:'0.3 mi'},
+  {n:'Barry’s SoHo',           a:'110 Greene St, New York',  d:'0.6 mi'},
+  {n:'Blink Fitness Union Sq', a:'4 Union Sq E, New York',   d:'0.8 mi'},
+  {n:'Chelsea Piers Fitness',  a:'Pier 60, Chelsea',         d:'1.4 mi'},
+  {n:'Crunch Lafayette',       a:'623 Broadway, New York',   d:'1.7 mi'},
+  {n:'Planet Fitness Flatiron',a:'25 W 14th St, New York',   d:'2.0 mi'},
+  {n:'Rumble Union Square',    a:'902 Broadway, New York',   d:'2.2 mi'},
+  {n:'Life Time Sky',          a:'605 W 42nd St, New York',  d:'3.1 mi'},
 ];
+const CHECK14=I.check.replace('width="22" height="22"','width="15" height="15"');
 S.onboard=()=>`
-<div class="scroll">
-  <div style="margin-bottom:18px">
+<div class="ob">
+  <div class="ob-head" id="obHead">
     <div class="eyebrow">Step 1 of 3</div>
-    <div class="h1" style="margin-top:9px">Pick your home gym</div>
-    <p class="sub" style="margin-top:8px">We’ll auto-detect check-ins when you arrive. You can change this anytime.</p>
+    <div class="h1" style="margin-top:9px;font-size:27px">Pick your home gym</div>
+    <p class="sub" style="margin-top:8px">We’ll auto-detect check-ins when you arrive. Change it anytime.</p>
+    <label class="searchbar" id="searchbar">
+      ${I.search}
+      <input id="gymSearch" type="text" inputmode="search" autocomplete="off" autocapitalize="off"
+             placeholder="Search gyms or neighborhoods" oninput="filterGyms(this.value)">
+      <button class="clr" onclick="clearGymSearch()" aria-label="Clear search">✕</button>
+    </label>
   </div>
-  <div class="card row" style="padding:0 14px;height:52px;margin-bottom:16px;gap:10px">
-    ${I.search}<span class="muted" style="font-size:15px">Search gyms near you</span>
-  </div>
-  <div style="display:flex;flex-direction:column;gap:10px">
+  <div class="ob-list" id="obList" onscroll="onObScroll(this)">
+    <div class="gcount" id="gcount">${GYMS.length} gyms near you</div>
     ${GYMS.map((g,i)=>`
-      <button class="card gymrow row" data-gym="${i}" style="gap:13px;cursor:pointer;text-align:left;width:100%">
-        <div style="width:58px;height:58px;flex:none">${mapThumb(i)}</div>
-        <div style="flex:1;min-width:0">
-          <b style="font-size:15px;font-weight:600;display:block">${g.n}</b>
-          <span class="muted tny">${g.a}</span>
+      <button class="gymrow" data-find="${(g.n+' '+g.a).toLowerCase()}" onclick="selectGym(this,${i})">
+        <div class="thumb">${mapThumb(i)}</div>
+        <div class="ginfo">
+          <b>${g.n}</b>
+          <div class="adr">${g.a}</div>
+          <div class="dist">${I.pin}${g.d} away</div>
         </div>
-        <div style="text-align:right;flex:none">
-          <div class="row" style="gap:4px;color:var(--t3);font-size:12px;justify-content:flex-end">${I.pin}${g.d}</div>
-          <div class="tick" style="margin-top:8px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line2);margin-left:auto"></div>
-        </div>
+        <div class="radio">${CHECK14}</div>
       </button>`).join('')}
+    <div class="gym-empty" id="gymEmpty" style="display:none">
+      <b>No gyms match “<span id="qEcho"></span>”</b>
+      Try a different name, or add your gym manually.
+    </div>
+    <p class="muted tny" style="text-align:center;margin:12px 0 4px">Don’t see your gym? <span style="color:var(--lime);font-weight:600">Add it manually</span></p>
   </div>
-  <p class="muted tny" style="text-align:center;margin-top:16px">Don’t see your gym? <span style="color:var(--lime);font-weight:600">Add it manually</span></p>
-</div>
-<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px 28px;background:linear-gradient(to top,var(--bg) 60%,transparent)">
-  <button class="btn btn-primary" onclick="go('home')">${I.check}This is my gym</button>
+  <div class="ob-foot">
+    <button class="btn btn-primary" id="obCta" onclick="confirmGym()" disabled>Select a gym to continue</button>
+  </div>
 </div>`;
 
 /* 2. HOME (theme-agnostic body; wrapper adds .has-tab) */
@@ -740,14 +805,31 @@ function go(id){
   wireGym();
   vp.querySelector('.scroll')?.scrollTo(0,0);
 }
-function wireGym(){
-  vp.querySelectorAll('.gymrow').forEach(r=>r.onclick=()=>{
-    vp.querySelectorAll('.gymrow').forEach(x=>{x.style.borderColor='var(--line)';x.querySelector('.tick').style.cssText='margin-top:8px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line2);margin-left:auto';});
-    r.style.borderColor='var(--lime)';
-    r.querySelector('.tick').style.cssText='margin-top:8px;width:24px;height:24px;border-radius:50%;margin-left:auto;background:var(--lime);display:grid;place-items:center';
-    r.querySelector('.tick').innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11" stroke="#0B0B0D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  });
+let selectedGym=null;
+function wireGym(){ selectedGym=null; } /* onboarding freshly rendered; selection handled inline */
+function selectGym(el,i){
+  document.querySelectorAll('#obList .gymrow').forEach(r=>r.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedGym=GYMS[i];
+  const cta=document.getElementById('obCta');
+  cta.disabled=false; cta.innerHTML=CHECK14+'This is my gym';
+  el.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
+function confirmGym(){ if(selectedGym) go('home'); }
+function filterGyms(q){
+  q=q.trim().toLowerCase();
+  document.getElementById('searchbar').classList.toggle('has-val', q.length>0);
+  let n=0;
+  document.querySelectorAll('#obList .gymrow').forEach(r=>{
+    const hit=r.dataset.find.includes(q);
+    r.classList.toggle('hidden', !hit); if(hit) n++;
+  });
+  document.getElementById('gcount').textContent = q ? `${n} match${n===1?'':'es'}` : `${GYMS.length} gyms near you`;
+  document.getElementById('gymEmpty').style.display = n===0 ? 'block' : 'none';
+  document.getElementById('qEcho').textContent = q;
+}
+function clearGymSearch(){ const i=document.getElementById('gymSearch'); i.value=''; filterGyms(''); i.focus(); }
+function onObScroll(el){ document.getElementById('obHead').classList.toggle('scrolled', el.scrollTop>4); }
 function react(btn){
   const c=btn.querySelector('.rc');const on=btn.classList.toggle('reacted');
   c.textContent=+c.textContent+(on?1:-1);
