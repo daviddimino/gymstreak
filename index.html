@@ -324,6 +324,17 @@
   .dock button.on{background:var(--lime);color:#0B0B0D}
   .dock .num{font-family:var(--stat);font-weight:800;opacity:.6;margin-right:5px}
   .dock button.on .num{opacity:.75}
+
+  /* ---------- dev-only screen badge (disable with ?dev=0) ---------- */
+  #devBadge{position:absolute;z-index:150;display:none;cursor:pointer;pointer-events:auto;
+    font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap;
+    background:rgba(212,255,63,.94);color:#0B0B0D;padding:3px 9px;border-radius:8px;
+    box-shadow:0 3px 12px rgba(0,0,0,.55);border:1px solid rgba(0,0,0,.25)}
+  #devBadge::before{content:"◈ ";opacity:.55}
+  #devBadge.b-tl{top:calc(env(safe-area-inset-top,0px) + 54px);left:10px}
+  #devBadge.b-tr{top:calc(env(safe-area-inset-top,0px) + 54px);right:10px}
+  #devBadge.b-br{bottom:calc(env(safe-area-inset-bottom,0px) + 100px);right:10px}
+  #devBadge.b-bl{bottom:calc(env(safe-area-inset-bottom,0px) + 100px);left:10px}
 </style>
 
 <style id="appmode">
@@ -361,6 +372,7 @@
   </div>
 
   <div class="viewport" id="viewport"><!-- screens injected --></div>
+  <div id="devBadge" onclick="cycleDevBadge()" title="Dev: current screen — tap to move"></div>
 </div>
 
 <div class="dock" id="dock"></div>
@@ -892,6 +904,19 @@ const dock=document.getElementById('dock');
 const phone=document.getElementById('phone');
 let current='onboard';
 
+/* ---- dev-only screen badge: shows which S.<screen> builder this page is (disable with ?dev=0) ---- */
+const DEV = new URLSearchParams(location.search).get('dev') !== '0';
+const DEV_CORNERS=['b-br','b-bl','b-tr','b-tl']; let devCorner=0;
+function setDevBadge(){
+  const b=document.getElementById('devBadge'); if(!b) return;
+  if(!DEV){ b.style.display='none'; return; }
+  const mapOpen=document.getElementById('obMap')?.classList.contains('open');
+  b.textContent = 'S.'+current + (mapOpen?' › map':'');
+  b.className=DEV_CORNERS[devCorner];
+  b.style.display='block';
+}
+function cycleDevBadge(){ devCorner=(devCorner+1)%DEV_CORNERS.length; setDevBadge(); }
+
 function go(id){
   current=id;
   const hasTab=['home','board','feed','friends','profile','boardEmpty','friendsEmpty'].includes(id);
@@ -904,6 +929,7 @@ function go(id){
   if(tb){tb.textContent=lightMode?'☀':'☾';tb.onclick=()=>{lightMode=!lightMode;go('home');};}
   wireGym();
   vp.querySelector('.scroll')?.scrollTo(0,0);
+  setDevBadge();
 }
 let multiMode=false;
 let selectedGyms=new Set();
@@ -930,8 +956,8 @@ function syncGymUI(){
   const mc=document.getElementById('mapCount');
   if(mc) mc.innerHTML = n ? `<b>${n}</b> gym${n>1?'s':''} selected` : 'Tap pins to add gyms';
 }
-function openGymMap(){ document.getElementById('obMap').classList.add('open'); syncGymUI(); }
-function closeGymMap(){ document.getElementById('obMap').classList.remove('open'); }
+function openGymMap(){ document.getElementById('obMap').classList.add('open'); syncGymUI(); setDevBadge(); }
+function closeGymMap(){ document.getElementById('obMap').classList.remove('open'); setDevBadge(); }
 function confirmGym(){ if(selectedGyms.size) go('home'); }
 function filterGyms(q){
   q=q.trim().toLowerCase();
