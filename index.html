@@ -301,6 +301,42 @@
     padding:14px 20px calc(18px + env(safe-area-inset-bottom,0px))}
   .obm-foot .cnt{flex:1;font-size:14px;color:var(--t2);font-weight:600}
   .obm-foot .cnt b{color:var(--t1)}
+  /* onboarding 3-step flow */
+  .ob-prog{display:flex;flex-direction:column;gap:8px}
+  .ob-bars{display:flex;gap:6px}
+  .ob-bars span{flex:1;height:4px;border-radius:999px;background:var(--line2);transition:background .25s}
+  .ob-bars span.on{background:var(--lime)}
+  .ob-body{flex:1;min-height:0;overflow-y:auto;padding:16px 20px 22px;display:flex;flex-direction:column}
+  .ob-body::-webkit-scrollbar{width:0}
+  .ob-center{align-items:center;text-align:center;justify-content:center}
+  .ob-hero{width:78px;height:78px;border-radius:24px;background:var(--lime);display:grid;place-items:center;box-shadow:0 14px 40px -12px rgba(212,255,63,.55)}
+  .ob-hero svg{width:40px;height:40px;color:#0B0B0D}
+  .ob-value{display:flex;flex-direction:column;gap:14px;margin-top:30px;width:100%;max-width:320px;text-align:left}
+  .ob-value-row{display:flex;gap:13px;align-items:center}
+  .ob-value-row .vi{font-size:20px;width:26px;text-align:center;flex:none}
+  .ob-value-row b{display:block;font-size:15px;font-weight:700}
+  .ob-value-row span{font-size:13px;color:var(--t2)}
+  .ob-devswitch{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;font-size:11px;color:var(--t3)}
+  .ob-devswitch button{height:26px;padding:0 10px;border-radius:8px;border:1px dashed var(--line2);background:var(--raise);color:var(--t2);font-family:var(--mono);font-size:11px;cursor:pointer}
+  .ob-devswitch button.on{background:var(--lime);color:#0B0B0D;border-style:solid;border-color:var(--lime)}
+  .uname-field{display:flex;align-items:center;height:56px;padding:0 16px;border-radius:14px;background:var(--raise);border:1px solid var(--line)}
+  .uname-field:focus-within{border-color:var(--line2)}
+  .uname-field .uat{font-family:var(--stat);font-weight:700;font-size:20px;color:var(--t3);margin-right:6px}
+  .uname-field input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--t1);font-family:var(--body);font-size:17px;caret-color:var(--lime)}
+  .uname-field input::placeholder{color:var(--t3)}
+  .uname-hint{font-size:12.5px;color:var(--t3);margin:8px 2px 0;font-weight:600;min-height:16px}
+  .uname-hint.good{color:var(--up)} .uname-hint.good::before{content:"✓ "}
+  .uname-hint.bad{color:var(--down)} .uname-hint.bad::before{content:"✕ "}
+  .ob-invite{cursor:pointer;text-align:center;padding:18px 10px}
+  .ob-invite .ei{font-size:23px}
+  .ob-invite div:last-child{font-weight:600;font-size:13.5px;margin-top:9px}
+  .ob-contacts{display:flex;align-items:center;gap:13px;padding:14px 16px}
+  .ob-contacts .stack{display:flex;flex:none}
+  .ob-contacts .stack span{margin-left:-12px}
+  .ob-contacts .stack span:first-child{margin-left:0}
+  .ob-contacts .stack .av{box-shadow:0 0 0 2px var(--card)}
+  .btn-add{flex:none;height:36px;padding:0 15px;border-radius:10px;border:none;background:var(--lime);color:#0B0B0D;font-family:var(--body);font-weight:700;font-size:13px;cursor:pointer}
+  .ob-skip{display:block;width:100%;margin-top:12px;background:none;border:none;color:var(--t3);font-family:var(--body);font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
   .backbtn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;color:var(--t1)}
 
   /* ---------- frozen app header + scrollable body (tab screens) ---------- */
@@ -502,68 +538,185 @@ const MAP_SVG=`<svg class="base" viewBox="0 0 350 470" preserveAspectRatio="xMid
     <path d="M110 0V470"/><path d="M222 0V470"/><path d="M140 192V470"/>
   </g>
 </svg>`;
-S.onboard=()=>`
-<div class="ob">
-  <div class="ob-head" id="obHead">
-    <div class="eyebrow">Step 1 of 3</div>
-    <div class="h1" style="margin-top:9px;font-size:27px">Pick your home gym</div>
-    <p class="sub" style="margin-top:8px">We’ll auto-detect check-ins when you arrive. Change it anytime.</p>
-    <label class="searchbar" id="searchbar">
-      ${I.search}
-      <input id="gymSearch" type="text" inputmode="search" autocomplete="off" autocapitalize="off"
-             placeholder="Search gyms or neighborhoods" oninput="filterGyms(this.value)">
-      <button class="clr" onclick="clearGymSearch()" aria-label="Clear search">✕</button>
-    </label>
-    <div class="ob-controls">
-      <div class="multi-toggle" onclick="toggleMulti()">
-        <span class="sw" id="multiSw"></span><span>Select multiple</span>
-      </div>
-      <button class="map-btn" onclick="openGymMap()">${I.pin}Map</button>
-    </div>
-  </div>
-  <div class="ob-list" id="obList" onscroll="onObScroll(this)">
-    <div class="gcount" id="gcount">${GYMS.length} gyms near you</div>
-    ${GYMS.map((g,i)=>`
-      <button class="gymrow" data-i="${i}" data-find="${(g.n+' '+g.a).toLowerCase()}" onclick="toggleGym(${i})">
-        <div class="thumb">${mapThumb(i)}</div>
-        <div class="ginfo">
-          <b>${g.n}</b>
-          <div class="adr">${g.a}</div>
-          <div class="dist">${I.pin}${g.d} away</div>
-        </div>
-        <div class="radio">${CHECK14}</div>
-      </button>`).join('')}
-    <div class="gym-empty" id="gymEmpty" style="display:none">
-      <b>No gyms match “<span id="qEcho"></span>”</b>
-      Try a different name, or add your gym manually.
-    </div>
-    <p class="muted tny" style="text-align:center;margin:12px 0 4px">Don’t see your gym? <span style="color:var(--lime);font-weight:600">Add it manually</span></p>
-  </div>
-  <div class="ob-foot">
-    <button class="btn btn-primary" id="obCta" onclick="confirmGym()" disabled>Select a gym to continue</button>
-  </div>
+/* ======================= ONBOARDING: one screen, 3 internal steps ======================= */
+/* Kept as the single S.onboard entry (no new go() screens). Step transitions re-render in
+   place; only finishing/skipping step 3 navigates away (go('home') === the onNext() call). */
+let onbStep=1;                 // 1 = value+location, 2 = gym, 3 = friends
+let onbLocGranted=true;        // set by the location permission result
+let onbLocState='granted';     // 'granted' | 'denied' | 'unavailable'
+const onbData={homeGym:'', username:''};   // persisted here; wire real storage later
+const CONTACTS_ON_APP=['jordan','maya','priya'];   // STUB (src/data.ts equivalent)
+const TAKEN_USERNAMES=new Set(['mayaruns','jru_lifts','priyapr','mwebb','devrunsnyc','soflifts','liamob','admin','david','gymstreak']); // STUB availability set
 
-  <!-- map picker overlay -->
-  <div class="ob-map" id="obMap">
-    <div class="obm-head">
-      <button class="backbtn" onclick="closeGymMap()">${I.back}</button>
-      <div class="ttl"><b>Gyms near you</b><span>Tap a pin to select · East Village, NYC</span></div>
+/* location.ts equivalent — STUBBED geolocation permission.
+   Switch the outcome for testing via the dev control on step 1, or window.__LOCATION_MODE.
+   We request WHILE-IN-USE only. NOTE: the "Always" upgrade should be requested AFTER the
+   user's first successful check-in, never during onboarding. */
+function requestLocation(){
+  // Real impl: navigator.geolocation.getCurrentPosition(...) with while-in-use authorization.
+  const mode=window.__LOCATION_MODE||'granted';  // 'granted' | 'denied' | 'unavailable'
+  return new Promise(res=>setTimeout(()=>res(mode),450));
+}
+function setLocMode(m){ window.__LOCATION_MODE=m; onbRender(); }
+async function onbEnableLocation(btn){
+  btn.disabled=true; btn.textContent='Requesting…';
+  const result=await requestLocation();          // never fired without this priming screen
+  onbLocState=result; onbLocGranted=(result==='granted');
+  onbStep=2; onbRender();
+}
+function onbBack(){ if(onbStep>1){ onbStep--; onbRender(); } }
+function onbRender(){
+  const scr=document.querySelector('.screen');
+  if(!scr) return;
+  scr.innerHTML=S.onboard();
+  if(onbStep===2) syncGymUI();
+  setDevBadge();
+}
+function onbProgress(){
+  return `<div class="ob-prog">
+    <div class="eyebrow">Step ${onbStep} of 3</div>
+    <div class="ob-bars">${[1,2,3].map(n=>`<span class="${n<=onbStep?'on':''}"></span>`).join('')}</div>
+  </div>`;
+}
+const valueRow=(ico,t,s)=>`<div class="ob-value-row"><span class="vi">${ico}</span><div><b>${t}</b><span>${s}</span></div></div>`;
+function gcountDefault(){ return onbLocGranted ? `${GYMS.length} gyms near you` : 'Search by name'; }
+
+S.onboard=()=> onbStep===1 ? onbStep1() : onbStep===3 ? onbStep3() : onbStep2();
+
+/* ---- STEP 1: value + location priming ---- */
+function onbStep1(){
+  const mode=window.__LOCATION_MODE||'granted';
+  return `<div class="ob">
+    <div class="ob-head">${onbProgress()}</div>
+    <div class="ob-body ob-center">
+      <div class="ob-hero"><span>${I.bolt}</span></div>
+      <div class="h1" style="font-size:33px;margin-top:22px;max-width:300px">Your streak keeps itself</div>
+      <p class="sub" style="margin-top:12px;max-width:300px">GymStreak checks you in automatically when you get to your gym. Nothing to tap at the door, nothing to forget — just show up.</p>
+      <div class="ob-value">
+        ${valueRow('📍','Auto check-in','We detect when you’re at your gym')}
+        ${valueRow('🔥','Streak on autopilot','Show up and it updates itself')}
+        ${valueRow('🔒','Private by design','Location is only used to spot your gym')}
+      </div>
     </div>
-    <div class="mapwrap">
-      ${MAP_SVG}
-      <div class="you-dot" style="left:46%;top:60%"></div>
-      ${PINS.map((p,i)=>`
-        <button class="pin" data-pin="${i}" style="left:${p[0]}%;top:${p[1]}%" onclick="toggleGym(${i})">
-          <span class="mk"><i></i></span><span class="lab">${p[2]}</span>
+    <div class="ob-foot">
+      <button class="btn btn-primary" id="obLocBtn" onclick="onbEnableLocation(this)">${I.pin}Enable location</button>
+      <div class="ob-devswitch"><span>dev · simulate result:</span>
+        ${['granted','denied','unavailable'].map(m=>`<button class="${m===mode?'on':''}" onclick="setLocMode('${m}')">${m}</button>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---- STEP 2: pick your home gym (existing picker; adapts to denied location) ---- */
+function onbStep2(){
+  return `<div class="ob">
+    <div class="ob-head" id="obHead">
+      <div class="row" style="gap:12px;align-items:flex-start"><button class="backbtn" onclick="onbBack()" title="Back">${I.back}</button><div style="flex:1">${onbProgress()}</div></div>
+      <div class="h1" style="margin-top:8px;font-size:27px">Pick your home gym</div>
+      <p class="sub" style="margin-top:8px">${onbLocGranted?'We’ll auto-detect check-ins when you arrive. Change it anytime.':'Location is off, so we can’t sort by distance — search for your gym by name.'}</p>
+      <label class="searchbar" id="searchbar">
+        ${I.search}
+        <input id="gymSearch" type="text" inputmode="search" autocomplete="off" autocapitalize="off"
+               placeholder="Search gyms or neighborhoods" oninput="filterGyms(this.value)">
+        <button class="clr" onclick="clearGymSearch()" aria-label="Clear search">✕</button>
+      </label>
+      <div class="ob-controls">
+        <div class="multi-toggle" onclick="toggleMulti()">
+          <span class="sw" id="multiSw"></span><span>Select multiple</span>
+        </div>
+        <button class="map-btn" onclick="openGymMap()">${I.pin}Map</button>
+      </div>
+    </div>
+    <div class="ob-list" id="obList" onscroll="onObScroll(this)">
+      <div class="gcount" id="gcount">${gcountDefault()}</div>
+      ${GYMS.map((g,i)=>`
+        <button class="gymrow" data-i="${i}" data-find="${(g.n+' '+g.a).toLowerCase()}" onclick="toggleGym(${i})">
+          <div class="thumb">${mapThumb(i)}</div>
+          <div class="ginfo">
+            <b>${g.n}</b>
+            <div class="adr">${g.a}</div>
+            ${onbLocGranted?`<div class="dist">${I.pin}${g.d} away</div>`:''}
+          </div>
+          <div class="radio">${CHECK14}</div>
         </button>`).join('')}
-      <div class="map-badge">You are here</div>
+      <div class="gym-empty" id="gymEmpty" style="display:none">
+        <b>No gyms match “<span id="qEcho"></span>”</b>
+        ${onbLocGranted?'Try a different name, or add your gym manually.':'Search for your gym by name, or add it manually.'}
+      </div>
+      <p class="muted tny" style="text-align:center;margin:12px 0 4px">Don’t see your gym? <span style="color:var(--lime);font-weight:600">Add it manually</span></p>
     </div>
-    <div class="obm-foot">
-      <div class="cnt" id="mapCount">Tap pins to add gyms</div>
-      <button class="btn btn-primary" style="width:auto;padding:0 24px;height:48px" onclick="closeGymMap()">Done</button>
+    <div class="ob-foot">
+      <button class="btn btn-primary" id="obCta" onclick="confirmGym()" disabled>Select a gym to continue</button>
     </div>
-  </div>
-</div>`;
+
+    <!-- map picker overlay -->
+    <div class="ob-map" id="obMap">
+      <div class="obm-head">
+        <button class="backbtn" onclick="closeGymMap()">${I.back}</button>
+        <div class="ttl"><b>Gyms near you</b><span>Tap a pin to select · East Village, NYC</span></div>
+      </div>
+      <div class="mapwrap">
+        ${MAP_SVG}
+        <div class="you-dot" style="left:46%;top:60%"></div>
+        ${PINS.map((p,i)=>`
+          <button class="pin" data-pin="${i}" style="left:${p[0]}%;top:${p[1]}%" onclick="toggleGym(${i})">
+            <span class="mk"><i></i></span><span class="lab">${p[2]}</span>
+          </button>`).join('')}
+        <div class="map-badge">You are here</div>
+      </div>
+      <div class="obm-foot">
+        <div class="cnt" id="mapCount">Tap pins to add gyms</div>
+        <button class="btn btn-primary" style="width:auto;padding:0 24px;height:48px" onclick="closeGymMap()">Done</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---- STEP 3: friends ---- */
+function onbStep3(){
+  return `<div class="ob">
+    <div class="ob-head">
+      <div class="row" style="gap:12px;align-items:flex-start"><button class="backbtn" onclick="onbBack()" title="Back">${I.back}</button><div style="flex:1">${onbProgress()}</div></div>
+      <div class="h1" style="margin-top:8px;font-size:27px">Bring your crew</div>
+      <p class="sub" style="margin-top:8px">Streaks stick when someone’s watching. Claim your handle and find people you know.</p>
+    </div>
+    <div class="ob-body">
+      <div class="eyebrow" style="margin-bottom:9px">Claim your username</div>
+      <label class="uname-field"><span class="uat">@</span>
+        <input id="unameInput" type="text" placeholder="yourname" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="onbCheckUsername(this.value)">
+      </label>
+      <div id="unameHint" class="uname-hint">3+ characters · letters and numbers</div>
+
+      <div class="eyebrow" style="margin:24px 0 10px">Find your friends</div>
+      <div class="grid2" style="margin-bottom:14px">
+        <button class="card ob-invite" onclick="toast('Opening contacts…')"><div class="ei">📇</div><div>Invite contacts</div></button>
+        <button class="card ob-invite" onclick="toast('Invite link copied')"><div class="ei">🔗</div><div>Share invite link</div></button>
+      </div>
+
+      <div class="card ob-contacts">
+        <div class="stack">${CONTACTS_ON_APP.map(k=>`<span>${avatar(k,38)}</span>`).join('')}</div>
+        <div style="flex:1;min-width:0"><b style="font-weight:700;font-size:14.5px">Jordan and 2 others</b>
+          <div class="muted tny">from your contacts are on GymStreak</div></div>
+        <button class="btn-add" onclick="toast('Added 3 friends')">Add all</button>
+      </div>
+    </div>
+    <div class="ob-foot">
+      <button class="btn btn-primary" onclick="onbFinish()">${I.check.replace('width="22" height="22"','width="18" height="18"')}Finish setup</button>
+      <button class="ob-skip" onclick="onbFinish()">Skip — you can add friends later</button>
+    </div>
+  </div>`;
+}
+function onbCheckUsername(v){
+  v=v.trim().toLowerCase().replace(/^@+/,'').replace(/[^a-z0-9_]/g,'');
+  onbData.username=v;
+  const h=document.getElementById('unameHint'); if(!h) return;
+  if(!v){ h.textContent='3+ characters · letters and numbers'; h.className='uname-hint'; return; }
+  if(v.length<3){ h.textContent='A little longer — 3+ characters'; h.className='uname-hint'; return; }
+  const taken=TAKEN_USERNAMES.has(v);           // STUB availability check
+  h.textContent = taken ? `@${v} is taken — try another` : `@${v} is available`;
+  h.className = 'uname-hint '+(taken?'bad':'good');
+}
+function onbFinish(){ onbStep=1; go('home'); }   // === onNext(): land on Home
 
 /* 2. HOME (theme-agnostic body; wrapper adds .has-tab) */
 function homeBody(){
@@ -592,7 +745,8 @@ function homeBody(){
     ${days.map(([l,hit,t])=>`<div class="day ${hit?'hit':''} ${t||''}"><span class="lab">${l}</span><div class="cell">${hit?dayCheck:''}</div></div>`).join('')}
   </div></div>
 
-  <button class="btn btn-primary" style="margin:18px 0" onclick="go('active')">${I.bolt}Check in at Equinox Bowery</button>
+  <button class="btn btn-primary" style="margin:18px 0 8px" onclick="go('active')">${I.bolt}Check in</button>
+  <div class="muted tny" style="display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:8px">${I.pin}Your gym · ${onbHomeGym()}</div>
 
   <div class="eyebrow" style="margin-bottom:10px">This week’s stats</div>
   <div class="grid2">
@@ -1081,7 +1235,13 @@ function syncGymUI(){
 }
 function openGymMap(){ document.getElementById('obMap').classList.add('open'); syncGymUI(); setDevBadge(); }
 function closeGymMap(){ document.getElementById('obMap').classList.remove('open'); setDevBadge(); }
-function confirmGym(){ if(selectedGyms.size) go('home'); }
+function confirmGym(){
+  if(!selectedGyms.size) return;
+  // GUESS: multi-select is allowed, so "home gym" = the first-selected gym (lowest index).
+  onbData.homeGym = GYMS[[...selectedGyms].sort((a,b)=>a-b)[0]].n;
+  onbStep=3; onbRender();
+}
+function onbHomeGym(){ return onbData.homeGym || 'Equinox Bowery'; }
 function filterGyms(q){
   q=q.trim().toLowerCase();
   document.getElementById('searchbar').classList.toggle('has-val', q.length>0);
@@ -1090,7 +1250,7 @@ function filterGyms(q){
     const hit=r.dataset.find.includes(q);
     r.classList.toggle('hidden', !hit); if(hit) n++;
   });
-  document.getElementById('gcount').textContent = q ? `${n} match${n===1?'':'es'}` : `${GYMS.length} gyms near you`;
+  document.getElementById('gcount').textContent = q ? `${n} match${n===1?'':'es'}` : gcountDefault();
   document.getElementById('gymEmpty').style.display = n===0 ? 'block' : 'none';
   document.getElementById('qEcho').textContent = q;
 }
