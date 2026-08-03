@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GymStreak">
+<meta name="theme-color" content="#0B0B0D">
+<title>GymStreak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0B0D; --card:#151518; --raise:#1C1C21; --raise2:#242429;
+    --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+    --lime:#D4FF3F; --t1:#F6F6F8; --t2:#9B9BA4; --t3:#66666E;
+    --up:#3BE384; --down:#FF5D63;
+    --stat:"Barlow Condensed",system-ui,sans-serif;
+    --body:"DM Sans",-apple-system,system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:var(--body);color:var(--t1);background:var(--bg);-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;min-height:100dvh}
+  #app{flex:1;display:flex;flex-direction:column;width:100%;max-width:480px;margin:0 auto;
+    padding:calc(env(safe-area-inset-top,0px) + 26px) 22px calc(env(safe-area-inset-bottom,0px) + 26px)}
+  .h1{font-family:var(--stat);font-weight:800;letter-spacing:-.02em;font-size:30px;line-height:1.03}
+  .stat-num{font-family:var(--stat);font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--t3);font-weight:800}
+  .sub{color:var(--t2);font-size:14.5px;line-height:1.5}
+  .muted{color:var(--t2)} .tny{font-size:12.5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .row{display:flex;align-items:center;gap:12px}
+  .between{display:flex;align-items:center;justify-content:space-between}
+  .grow{flex:1;min-width:0}
+  .btn{display:flex;align-items:center;justify-content:center;gap:9px;height:54px;border-radius:15px;border:none;
+    width:100%;cursor:pointer;font-family:var(--stat);font-weight:800;font-size:17px;letter-spacing:0}
+  .btn-primary{background:var(--lime);color:#0B0B0D}
+  .btn-primary:disabled{background:var(--raise2);color:var(--t3);cursor:default}
+  .btn-ghost{background:transparent;color:var(--t1);border:1px solid var(--line2)}
+  .btn-dark{background:var(--raise);color:var(--t1);border:1px solid var(--line)}
+  input,select{width:100%;height:54px;padding:0 15px;border-radius:14px;background:var(--raise);
+    border:1px solid var(--line);color:var(--t1);font-family:var(--body);font-size:16px;outline:none}
+  input:focus,select:focus{border-color:var(--line2)}
+  input::placeholder{color:var(--t3)}
+  label.field{display:block;margin-bottom:16px}
+  label.field .eyebrow{margin-bottom:8px;display:block}
+  .uwrap{display:flex;align-items:center;height:54px;padding:0 15px;border-radius:14px;background:var(--raise);border:1px solid var(--line)}
+  .uwrap:focus-within{border-color:var(--line2)}
+  .uwrap span{font-family:var(--stat);font-weight:700;font-size:20px;color:var(--t3);margin-right:6px}
+  .uwrap input{height:auto;padding:0;background:none;border:none}
+  .logo{display:inline-flex;align-items:center;gap:10px}
+  .logo .mk{width:38px;height:38px;border-radius:11px;background:var(--lime);display:grid;place-items:center}
+  .logo .mk svg{width:22px;height:22px;color:#0B0B0D}
+  .logo b{font-family:var(--stat);font-weight:800;font-size:23px;letter-spacing:-.02em}
+  .spacer{flex:1}
+  .center{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .err{color:var(--down);font-size:13.5px;font-weight:600;margin-top:10px;min-height:18px}
+  .ok{color:var(--up)}
+  .pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 11px;border-radius:999px;font-size:12px;font-weight:700;
+    background:rgba(212,255,63,.14);color:var(--lime)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .sess{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;background:var(--card);
+    border:1px solid var(--line);border-radius:14px}
+  .link{background:none;border:none;color:var(--t3);font-family:var(--body);font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .ring-wrap{position:relative;width:230px;height:230px}
+  .timer{font-family:var(--mono);font-weight:700;font-size:46px;letter-spacing:-.02em}
+  .toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(8px);z-index:50;background:var(--raise2);
+    color:var(--t1);border:1px solid var(--line2);padding:11px 17px;border-radius:12px;font-size:13.5px;font-weight:600;
+    opacity:0;pointer-events:none;transition:.2s;max-width:86%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  .fade{animation:fade .28s ease both}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="app"><div class="spacer"></div><div class="center"><div class="muted">Loading…</div></div><div class="spacer"></div></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://kvklusfjdnjyougrqvms.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_sWwDwjfJEsg-7NmKuGGIuA_03xnZy42';
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const BOLT = '<svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="currentColor"/></svg>';
+const app = document.getElementById('app');
+const $ = (id)=>document.getElementById(id);
+const esc = s => (s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1800); }
+const fmtDur = min => `${Math.floor(min/60)}h ${String(min%60).padStart(2,'0')}m`;
+const fmtClock = ts => new Date(ts).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+
+// ---- app state ----
+let user=null, profile=null, gyms=[], activeSession=null, timerInt=null;
+
+async function boot(){
+  const { data:{ session } } = await sb.auth.getSession();
+  user = session?.user || null;
+  if(!user){ renderSignIn(); return; }
+  await loadProfile();
+}
+sb.auth.onAuthStateChange(async (_e, session)=>{
+  const u = session?.user || null;
+  if(u && (!user || u.id!==user.id)){ user=u; await loadProfile(); }
+  if(!u && user){ user=null; profile=null; renderSignIn(); }
+});
+
+async function loadProfile(){
+  const { data, error } = await sb.from('profiles')
+    .select('username, display_name, home_gym_id, home_gym:home_gym_id(name)')
+    .eq('id', user.id).maybeSingle();
+  if(error){ renderError(error.message); return; }
+  profile = data || {};
+  if(!profile.username || !profile.home_gym_id){ await renderSetup(); return; }
+  // resume an in-progress session if one exists
+  const { data:open } = await sb.from('sessions').select('*, gym:gym_id(name)')
+    .eq('user_id', user.id).is('ended_at', null).order('started_at',{ascending:false}).limit(1);
+  activeSession = (open && open[0]) || null;
+  if(activeSession) renderActive(); else renderHome();
+}
+
+// ======================= SIGN IN =======================
+function renderSignIn(){
+  app.innerHTML = `
+    <div class="spacer"></div>
+    <div class="center fade">
+      <div class="logo" style="margin-bottom:26px"><span class="mk">${BOLT}</span><b>GymStreak</b></div>
+      <div class="h1" style="font-size:34px;max-width:300px">Your streak keeps itself</div>
+      <p class="sub" style="margin-top:12px;max-width:300px">Sign in with your email — no password. We’ll send you a magic link.</p>
+    </div>
+    <div class="spacer"></div>
+    <div class="fade">
+      <label class="field"><span class="eyebrow">Email</span>
+        <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
+      </label>
+      <button class="btn btn-primary" id="sendBtn">Send magic link</button>
+      <div class="err" id="signErr"></div>
+    </div>`;
+  $('sendBtn').onclick = sendLink;
+  $('email').addEventListener('keydown', e=>{ if(e.key==='Enter') sendLink(); });
+}
+async function sendLink(){
+  const email = $('email').value.trim();
+  const err = $('signErr'); err.textContent='';
+  if(!/^\S+@\S+\.\S+$/.test(email)){ err.textContent='Enter a valid email address.'; return; }
+  const btn = $('sendBtn'); btn.disabled=true; btn.textContent='Sending…';
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: location.origin + location.pathname } });
+  btn.disabled=false; btn.textContent='Send magic link';
+  if(error){ err.textContent=error.message; return; }
+  app.innerHTML = `
+    <div class="spacer"></div>
+    <div class="center fade">
+      <div class="logo" style="margin-bottom:24px"><span class="mk">${BOLT}</span><b>GymStreak</b></div>
+      <div style="font-size:44px;margin-bottom:8px">📬</div>
+      <div class="h1" style="font-size:26px">Check your email</div>
+      <p class="sub" style="margin-top:12px;max-width:300px">We sent a magic link to <b style="color:var(--t1)">${esc(email)}</b>. Open it on this phone to sign in.</p>
+    </div>
+    <div class="spacer"></div>
+    <button class="link" onclick="location.reload()" style="align-self:center">Use a different email</button>`;
+}
+
+// ======================= SETUP (onboarding) =======================
+async function renderSetup(){
+  if(!gyms.length){ const { data } = await sb.from('gyms').select('id,name,address').order('name'); gyms = data||[]; }
+  app.innerHTML = `
+    <div class="fade">
+      <div class="eyebrow">Welcome</div>
+      <div class="h1" style="margin-top:8px">Set up your profile</div>
+      <p class="sub" style="margin-top:8px;margin-bottom:26px">Pick a username and your home gym. You can change these later.</p>
+      <label class="field"><span class="eyebrow">Username</span>
+        <div class="uwrap"><span>@</span><input id="uname" type="text" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="yourname" value="${esc((profile.username||'').replace(/^@/,''))}"></div>
+      </label>
+      <label class="field"><span class="eyebrow">Home gym</span>
+        <select id="gym">${gyms.map(g=>`<option value="${g.id}" ${g.id===profile.home_gym_id?'selected':''}>${esc(g.name)}</option>`).join('')}</select>
+      </label>
+      <div class="err" id="setErr"></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="saveBtn">Save & continue</button>`;
+  $('saveBtn').onclick = saveSetup;
+}
+async function saveSetup(){
+  const uname = $('uname').value.trim().toLowerCase().replace(/^@+/,'').replace(/[^a-z0-9_]/g,'');
+  const home_gym_id = $('gym').value;
+  const err = $('setErr'); err.textContent='';
+  if(uname.length<3){ err.textContent='Username needs at least 3 characters.'; return; }
+  const btn = $('saveBtn'); btn.disabled=true; btn.textContent='Saving…';
+  const { error } = await sb.from('profiles').update({ username:uname, home_gym_id }).eq('id', user.id);
+  btn.disabled=false; btn.textContent='Save & continue';
+  if(error){ err.textContent = error.code==='23505' ? `@${uname} is already taken — try another.` : error.message; return; }
+  await loadProfile();
+}
+
+// ======================= HOME =======================
+async function renderHome(){
+  const gymName = profile.home_gym?.name || 'your gym';
+  // weekly stats + recent sessions in parallel
+  const [{ data:ws }, { data:recent }] = await Promise.all([
+    sb.from('weekly_stats').select('sessions,total_min').eq('user_id', user.id).maybeSingle(),
+    sb.from('sessions').select('id, started_at, ended_at, duration_min, gym:gym_id(name)')
+      .eq('user_id', user.id).not('ended_at','is',null).order('started_at',{ascending:false}).limit(8)
+  ]);
+  const weekSessions = ws?.sessions || 0;
+  const weekMin = ws?.total_min || 0;
+  app.innerHTML = `
+    <div class="between fade" style="margin-bottom:24px">
+      <div class="logo"><span class="mk">${BOLT}</span><b>GymStreak</b></div>
+      <button class="link" id="signout">Sign out</button>
+    </div>
+    <div class="fade">
+      <div class="eyebrow">This week</div>
+      <div class="card" style="margin-top:10px">
+        <div class="between">
+          <div><div class="stat-num" style="font-size:48px">${fmtDur(weekMin)}</div><div class="muted tny" style="margin-top:2px">total time</div></div>
+          <div style="text-align:right"><div class="stat-num" style="font-size:48px">${weekSessions}</div><div class="muted tny" style="margin-top:2px">session${weekSessions===1?'':'s'}</div></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="checkin" style="margin:22px 0 8px">${BOLT.replace('viewBox','width="20" height="20" viewBox')}Check in</button>
+      <div class="muted tny" style="text-align:center;display:flex;justify-content:center;gap:5px">📍 ${esc(gymName)}</div>
+
+      <div class="eyebrow" style="margin:26px 0 12px">Recent sessions</div>
+      <div style="display:flex;flex-direction:column;gap:10px" id="recent">
+        ${(recent&&recent.length) ? recent.map(s=>`
+          <div class="sess">
+            <div><b style="font-weight:600;font-size:14.5px">${esc(s.gym?.name||'Gym')}</b>
+              <div class="muted tny">${fmtDay(s.started_at)} · ${fmtClock(s.started_at)}</div></div>
+            <div class="stat-num" style="font-size:22px">${s.duration_min}<span style="font-size:12px;color:var(--t2)"> min</span></div>
+          </div>`).join('')
+          : `<div class="card center" style="padding:26px;color:var(--t2)">No sessions yet — tap <b style="color:var(--t1)">Check in</b> when you get to the gym.</div>`}
+      </div>
+    </div>`;
+  $('checkin').onclick = checkIn;
+  $('signout').onclick = async ()=>{ await sb.auth.signOut(); };
+}
+function fmtDay(ts){
+  const d=new Date(ts), now=new Date();
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dd=(a,b)=>a.toDateString()===b.toDateString();
+  const y=new Date(now); y.setDate(now.getDate()-1);
+  if(dd(d,now)) return 'Today'; if(dd(d,y)) return 'Yesterday';
+  return days[d.getDay()]+' '+(d.getMonth()+1)+'/'+d.getDate();
+}
+
+// ======================= CHECK IN / ACTIVE =======================
+async function checkIn(){
+  const btn=$('checkin'); btn.disabled=true; btn.textContent='Checking in…';
+  const { data, error } = await sb.from('sessions')
+    .insert({ user_id:user.id, gym_id:profile.home_gym_id })
+    .select('*, gym:gym_id(name)').single();
+  if(error){ btn.disabled=false; btn.textContent='Check in'; toast(error.message); return; }
+  activeSession = data;
+  renderActive();
+}
+function renderActive(){
+  const gymName = activeSession.gym?.name || profile.home_gym?.name || 'your gym';
+  app.innerHTML = `
+    <div class="spacer"></div>
+    <div class="center fade">
+      <div class="pill" style="margin-bottom:22px"><span class="dot"></span>Live</div>
+      <div class="muted" style="font-size:14px">You’re at</div>
+      <div class="h1" style="font-size:26px;margin:6px 0 26px">${esc(gymName)}</div>
+      <div class="ring-wrap">
+        <svg width="230" height="230" viewBox="0 0 230 230" style="transform:rotate(-90deg)">
+          <circle cx="115" cy="115" r="104" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>
+          <circle id="ring" cx="115" cy="115" r="104" fill="none" stroke="var(--lime)" stroke-width="9" stroke-linecap="round"
+            stroke-dasharray="653" stroke-dashoffset="653" style="filter:drop-shadow(0 0 9px rgba(212,255,63,.5))"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div class="eyebrow">Elapsed</div>
+          <div class="timer" id="timer" style="margin-top:6px">00:00</div>
+        </div>
+      </div>
+      <div class="muted tny" style="margin-top:18px">Started ${fmtClock(activeSession.started_at)} · goal 60m</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost fade" id="end">End session</button>`;
+  $('end').onclick = endSession;
+  startTimer();
+}
+function startTimer(){
+  clearInterval(timerInt);
+  const started = new Date(activeSession.started_at).getTime();
+  const tick=()=>{
+    const s = Math.max(0, Math.floor((Date.now()-started)/1000));
+    const el=$('timer'); if(!el){ clearInterval(timerInt); return; }
+    el.textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    const ring=$('ring'); if(ring){ const frac=Math.min((s/60)/60,1); ring.setAttribute('stroke-dashoffset', 653-653*frac); }
+  };
+  tick(); timerInt=setInterval(tick,1000);
+}
+async function endSession(){
+  const btn=$('end'); btn.disabled=true; btn.textContent='Saving…';
+  const { error } = await sb.from('sessions').update({ ended_at:new Date().toISOString() }).eq('id', activeSession.id);
+  clearInterval(timerInt);
+  if(error){ btn.disabled=false; btn.textContent='End session'; toast(error.message); return; }
+  const mins = Math.max(0, Math.floor((Date.now()-new Date(activeSession.started_at).getTime())/60000));
+  activeSession=null;
+  await loadProfile();           // refresh (routes back to Home with fresh stats)
+  toast(`Session saved · ${mins} min 🔥`);
+}
+
+function renderError(msg){
+  app.innerHTML = `<div class="spacer"></div><div class="center"><div class="h1" style="font-size:22px">Something went wrong</div>
+    <p class="sub" style="margin-top:10px;max-width:300px">${esc(msg)}</p>
+    <button class="link" style="margin-top:16px" onclick="location.reload()">Reload</button></div><div class="spacer"></div>`;
+}
+
+boot();
+</script>
+</body>
+</html>
