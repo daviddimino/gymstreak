@@ -298,6 +298,21 @@
   .gymrow.hidden{display:none}
   .gym-empty{text-align:center;color:var(--t2);padding:34px 20px;font-size:13.5px;line-height:1.5}
   .gym-empty b{color:var(--t1);display:block;margin-bottom:6px;font-size:15px}
+  /* skeleton loading rows — same footprint as a .gymrow so the list fills in, not jumps */
+  .gymrow.skel{cursor:default;pointer-events:none}
+  .sk{display:block;border-radius:8px;background:linear-gradient(100deg,var(--raise) 30%,var(--raise2) 50%,var(--raise) 70%);
+    background-size:200% 100%;animation:sk 1.2s ease-in-out infinite}
+  .gymrow .thumb.sk{width:56px;height:56px;border-radius:13px}
+  .sk-l1{width:56%;height:15px;margin-bottom:9px}
+  .sk-l2{width:78%;height:12px}
+  @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  /* list-state panels: empty / error / location-denied / location-failed */
+  .gym-state{text-align:center;color:var(--t2);padding:30px 18px 8px;font-size:13.5px;line-height:1.5}
+  .gym-state b{color:var(--t1);display:block;margin-bottom:6px;font-size:15.5px}
+  .gym-state p{margin:0 auto;max-width:280px}
+  .gym-retry{display:inline-flex;align-items:center;gap:7px;margin-top:16px;height:44px;padding:0 18px;border-radius:12px;
+    background:var(--lime);border:none;color:#0B0B0D;font-family:var(--stat);font-weight:800;font-size:15px;cursor:pointer}
+  .gym-retry svg{color:#0B0B0D}
   /* controls row: multi-select toggle + map button */
   .ob-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
   .multi-toggle{display:flex;align-items:center;gap:11px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--t2)}
@@ -575,35 +590,181 @@ const MAP_SVG=`<svg class="base" viewBox="0 0 350 470" preserveAspectRatio="xMid
 /* Kept as the single S.onboard entry (no new go() screens). Step transitions re-render in
    place; only finishing/skipping step 3 navigates away (go('home') === the onNext() call). */
 let onbStep=1;                 // 1 = value+location, 2 = gym, 3 = friends
-let onbLocGranted=true;        // set by the location permission result
-let onbLocState='granted';     // 'granted' | 'denied' | 'unavailable'
+let onbLocGranted=true;        // derived: onbLocState === 'granted'
+let onbLocState='granted';     // 'granted' | 'denied' | 'unavailable' | 'locfail'
+let onbCoords=null;            // {lat,lng} once we have a real fix
 const onbData={homeGym:'', username:''};   // persisted here; wire real storage later
 const CONTACTS_ON_APP=['jordan','maya','priya'];   // STUB (src/data.ts equivalent)
 const TAKEN_USERNAMES=new Set(['mayaruns','jru_lifts','priyapr','mwebb','devrunsnyc','soflifts','liamob','admin','david','gymstreak']); // STUB availability set
 
-/* location.ts equivalent — STUBBED geolocation permission.
-   Switch the outcome for testing via the dev control on step 1, or window.__LOCATION_MODE.
-   We request WHILE-IN-USE only. NOTE: the "Always" upgrade should be requested AFTER the
-   user's first successful check-in, never during onboarding. */
+// ---- gym search backend (Supabase edge function; API key stays server-side) ----
+const GYMS_FN='https://kvklusfjdnjyougrqvms.supabase.co/functions/v1/gyms-nearby';
+const SB_ANON='sb_publishable_sWwDwjfJEsg-7NmKuGGIuA_03xnZy42';  // publishable key, safe in client
+async function fetchGyms(payload, signal){
+  const res=await fetch(GYMS_FN,{method:'POST',signal,
+    headers:{'content-type':'application/json','authorization':`Bearer ${SB_ANON}`,'apikey':SB_ANON},
+    body:JSON.stringify(payload)});
+  if(!res.ok) throw new Error('http '+res.status);
+  const data=await res.json();
+  if(data.error) throw new Error(data.error);
+  return data.gyms||[];
+}
+const obEsc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* location.ts equivalent — real WHILE-IN-USE geolocation, with a dev override.
+   Resolves to { state, coords }:
+     granted     → have a fix; coords set          (do a nearby search)
+     denied      → permission refused; no coords    (search-by-name only)
+     unavailable → geolocation not supported        (search-by-name only)
+     locfail     → permission ok but no fix / timeout (own retry path)
+   The dev switch on step 1 sets window.__LOCATION_MODE to force any outcome
+   without moving. NOTE: the "Always" upgrade belongs AFTER the first check-in,
+   never during onboarding. */
 function requestLocation(){
-  // Real impl: navigator.geolocation.getCurrentPosition(...) with while-in-use authorization.
-  const mode=window.__LOCATION_MODE||'granted';  // 'granted' | 'denied' | 'unavailable'
-  return new Promise(res=>setTimeout(()=>res(mode),450));
+  const sim=window.__LOCATION_MODE;              // dev override; unset = use the real device
+  if(sim){
+    const coords = sim==='granted' ? {lat:40.7264,lng:-73.9915} : null;  // East Village, NYC
+    const state = sim==='timeout' ? 'locfail' : sim;
+    return new Promise(res=>setTimeout(()=>res({state,coords}),450));
+  }
+  if(!('geolocation' in navigator)) return Promise.resolve({state:'unavailable',coords:null});
+  return new Promise(res=>{
+    navigator.geolocation.getCurrentPosition(
+      p=>res({state:'granted',coords:{lat:p.coords.latitude,lng:p.coords.longitude}}),
+      err=>res({state: err.code===1 ? 'denied' : 'locfail', coords:null}),  // 1 = PERMISSION_DENIED; 2/3 = no fix
+      {enableHighAccuracy:false,timeout:8000,maximumAge:60000}
+    );
+  });
 }
 function setLocMode(m){ window.__LOCATION_MODE=m; onbRender(); }
 async function onbEnableLocation(btn){
   btn.disabled=true; btn.textContent='Requesting…';
-  const result=await requestLocation();          // never fired without this priming screen
-  onbLocState=result; onbLocGranted=(result==='granted');
+  const {state,coords}=await requestLocation();  // never fired without this priming screen
+  onbLocState=state; onbLocGranted=(state==='granted'); onbCoords=coords;
   onbStep=2; onbRender();
+}
+// Retry the location fix from the 'locfail' path (permission was granted, fix failed).
+async function retryLocation(){
+  const {state,coords}=await requestLocation();
+  onbLocState=state; onbLocGranted=(state==='granted'); onbCoords=coords;
+  onbGymsCache=null;                             // force a fresh nearby fetch if we now have coords
+  onbRender();
 }
 function onbBack(){ if(onbStep>1){ onbStep--; onbRender(); } }
 function onbRender(){
   const scr=document.querySelector('.screen');
   if(!scr) return;
   scr.innerHTML=S.onboard();
-  if(onbStep===2) syncGymUI();
+  if(onbStep===2){                               // (re)entering the gym step
+    onbSearchQuery='';                           // fresh input each render
+    clearTimeout(onbSearchTimer);
+    if(onbSearchAbort){ onbSearchAbort.abort(); onbSearchAbort=null; }
+    loadInitialGyms();                           // paints skeletons → results (or the right no-coords state)
+  }
   setDevBadge();
+}
+
+// ---- gym-list state (session-scoped) ----
+let onbGyms=[];              // rows currently shown
+let onbListState='idle';     // loading | loaded | empty | error | denied | locfail
+let onbGymsCache=null;       // cached initial nearby results — survives back/forward, no refetch
+let onbGymsById=new Map();   // id -> gym, so selection resolves across list swaps (nearby ↔ search)
+let onbSearchQuery='';
+let onbSearchTimer=null;
+let onbSearchAbort=null;
+
+// Initial list for step 2: nearby search when we have coords, otherwise the matching no-coords state.
+async function loadInitialGyms(){
+  if(onbLocState==='denied'||onbLocState==='unavailable'){ onbListState='denied'; renderGymList(); return; }
+  if(onbLocState==='locfail'||!onbCoords){ onbListState='locfail'; renderGymList(); return; }
+  if(onbGymsCache){ onbGyms=onbGymsCache; onbListState=onbGymsCache.length?'loaded':'empty'; renderGymList(); return; }
+  onbListState='loading'; renderGymList();
+  try{
+    const gyms=await fetchGyms({mode:'nearby',lat:onbCoords.lat,lng:onbCoords.lng});
+    onbGymsCache=gyms; onbGyms=gyms; onbListState=gyms.length?'loaded':'empty';
+  }catch(e){ onbListState='error'; }             // visible failure — never fall back to mock data
+  renderGymList();
+}
+
+// Search box → text-search endpoint, debounced 300ms, in-flight request cancelled on each new keystroke.
+function onSearchInput(v){
+  onbSearchQuery=v.trim();
+  document.getElementById('searchbar').classList.toggle('has-val', onbSearchQuery.length>0);
+  clearTimeout(onbSearchTimer);
+  if(!onbSearchQuery){ restoreLocationView(); return; }   // cleared → back to the location-based list
+  onbSearchTimer=setTimeout(runSearch,300);
+}
+async function runSearch(){
+  if(onbSearchAbort) onbSearchAbort.abort();
+  onbSearchAbort=new AbortController();
+  onbListState='loading'; renderGymList();
+  try{
+    const payload={mode:'search',query:onbSearchQuery};
+    if(onbCoords){ payload.lat=onbCoords.lat; payload.lng=onbCoords.lng; }  // distances only when we know where the user is
+    const gyms=await fetchGyms(payload,onbSearchAbort.signal);
+    onbGyms=gyms; onbListState=gyms.length?'loaded':'empty'; renderGymList();
+  }catch(e){
+    if(e.name==='AbortError') return;            // superseded by a newer keystroke
+    onbListState='error'; renderGymList();
+  }
+}
+function restoreLocationView(){
+  if(onbSearchAbort){ onbSearchAbort.abort(); onbSearchAbort=null; }
+  loadInitialGyms();
+}
+function retryGyms(){ if(onbSearchQuery) runSearch(); else { onbGymsCache=null; loadInitialGyms(); } }
+
+function renderGymList(){
+  const list=document.getElementById('obList'); if(!list) return;
+  const st=onbListState, searching=!!onbSearchQuery, showDist=(onbLocState==='granted');
+  const rows=gyms=>gyms.map((g,i)=>{ onbGymsById.set(g.id,g); return `
+    <button class="gymrow" data-id="${obEsc(g.id)}" onclick="toggleGym(this.dataset.id)">
+      <div class="thumb">${mapThumb(i)}</div>
+      <div class="ginfo">
+        <b>${obEsc(g.name)}</b>
+        <div class="adr">${obEsc(g.address)}</div>
+        ${showDist&&g.distance_mi!=null?`<div class="dist">${I.pin}${g.distance_mi.toFixed(1)} mi away</div>`:''}
+      </div>
+      <div class="radio">${CHECK14}</div>
+    </button>`; }).join('');
+
+  // count header — hidden entirely when we have no coordinates (denied/unavailable)
+  let count='';
+  if(searching){ if(st==='loaded') count=`${onbGyms.length} match${onbGyms.length===1?'':'es'}`; }
+  else if(onbLocState==='granted'&&st==='loaded'){ count=`${onbGyms.length} gym${onbGyms.length===1?'':'s'} near you`; }
+  const countHTML = count ? `<div class="gcount">${count}</div>` : '';
+
+  let body='';
+  if(st==='loading'){
+    body=Array.from({length:6}).map(()=>`
+      <div class="gymrow skel">
+        <div class="thumb sk"></div>
+        <div class="ginfo"><span class="sk sk-l1"></span><span class="sk sk-l2"></span></div>
+        <div class="radio" style="border-color:var(--line)"></div>
+      </div>`).join('');
+  } else if(st==='error'){
+    body=`<div class="gym-state"><b>Couldn’t load gyms</b>
+      <p>Something went wrong reaching gym search. Check your connection and try again.</p>
+      <button class="gym-retry" onclick="retryGyms()">${I.pin}Try again</button></div>`;
+  } else if(st==='loaded'){
+    body=rows(onbGyms);
+  } else if(st==='empty'){
+    body=searching
+      ? `<div class="gym-state"><b>No gyms match “${obEsc(onbSearchQuery)}”</b><p>Try a different name.</p></div>`
+      : `<div class="gym-state"><b>No gyms found nearby</b><p>Nothing within a few miles. Search for your gym by name above.</p></div>`;
+  } else if(st==='denied'){
+    body=`<div class="gym-state"><b>Search for your gym</b>
+      <p>Location is off, so we can’t sort by distance. Type your gym’s name in the search box above.</p></div>`;
+  } else if(st==='locfail'){
+    body=`<div class="gym-state"><b>Couldn’t pin your location</b>
+      <p>We had permission but couldn’t get a fix. Retry, or search for your gym by name above.</p>
+      <button class="gym-retry" onclick="retryLocation()">${I.pin}Retry location</button></div>`;
+  }
+  const showManual = ['loaded','empty','denied','locfail'].includes(st);
+  const manual = showManual
+    ? `<p class="muted tny" style="text-align:center;margin:14px 0 4px">Don’t see your gym? <span style="color:var(--lime);font-weight:600">Add it manually</span></p>` : '';
+  list.innerHTML = countHTML + body + manual;
+  syncGymUI();                                   // re-apply selection highlight to the fresh rows
 }
 function onbProgress(){
   return `<div class="ob-prog">
@@ -612,7 +773,6 @@ function onbProgress(){
   </div>`;
 }
 const valueRow=(ico,t,s)=>`<div class="ob-value-row"><span class="vi">${ico}</span><div><b>${t}</b><span>${s}</span></div></div>`;
-function gcountDefault(){ return onbLocGranted ? `${GYMS.length} gyms near you` : 'Search by name'; }
 
 S.onboard=()=> onbStep===1 ? onbStep1() : onbStep===3 ? onbStep3() : onbStep2();
 
@@ -634,7 +794,7 @@ function onbStep1(){
     <div class="ob-foot">
       <button class="btn btn-primary" id="obLocBtn" onclick="onbEnableLocation(this)">${I.pin}Enable location</button>
       <div class="ob-devswitch"><span>dev · simulate result:</span>
-        ${['granted','denied','unavailable'].map(m=>`<button class="${m===mode?'on':''}" onclick="setLocMode('${m}')">${m}</button>`).join('')}
+        ${['granted','denied','unavailable','timeout'].map(m=>`<button class="${m===mode?'on':''}" onclick="setLocMode('${m}')">${m}</button>`).join('')}
       </div>
     </div>
   </div>`;
@@ -650,7 +810,7 @@ function onbStep2(){
       <label class="searchbar" id="searchbar">
         ${I.search}
         <input id="gymSearch" type="text" inputmode="search" autocomplete="off" autocapitalize="off"
-               placeholder="Search gyms or neighborhoods" oninput="filterGyms(this.value)">
+               placeholder="Search gyms or neighborhoods" oninput="onSearchInput(this.value)">
         <button class="clr" onclick="clearGymSearch()" aria-label="Clear search">✕</button>
       </label>
       <div class="ob-controls">
@@ -660,24 +820,7 @@ function onbStep2(){
         <button class="map-btn" onclick="openGymMap()">${I.pin}Map</button>
       </div>
     </div>
-    <div class="ob-list" id="obList" onscroll="onObScroll(this)">
-      <div class="gcount" id="gcount">${gcountDefault()}</div>
-      ${GYMS.map((g,i)=>`
-        <button class="gymrow" data-i="${i}" data-find="${(g.n+' '+g.a).toLowerCase()}" onclick="toggleGym(${i})">
-          <div class="thumb">${mapThumb(i)}</div>
-          <div class="ginfo">
-            <b>${g.n}</b>
-            <div class="adr">${g.a}</div>
-            ${onbLocGranted?`<div class="dist">${I.pin}${g.d} away</div>`:''}
-          </div>
-          <div class="radio">${CHECK14}</div>
-        </button>`).join('')}
-      <div class="gym-empty" id="gymEmpty" style="display:none">
-        <b>No gyms match “<span id="qEcho"></span>”</b>
-        ${onbLocGranted?'Try a different name, or add your gym manually.':'Search for your gym by name, or add it manually.'}
-      </div>
-      <p class="muted tny" style="text-align:center;margin:12px 0 4px">Don’t see your gym? <span style="color:var(--lime);font-weight:600">Add it manually</span></p>
-    </div>
+    <div class="ob-list" id="obList" onscroll="onObScroll(this)"><!-- filled by renderGymList() --></div>
     <div class="ob-foot">
       <button class="btn btn-primary" id="obCta" onclick="confirmGym()" disabled>Select a gym to continue</button>
     </div>
@@ -691,14 +834,14 @@ function onbStep2(){
       <div class="mapwrap">
         ${MAP_SVG}
         <div class="you-dot" style="left:46%;top:60%"></div>
-        ${PINS.map((p,i)=>`
-          <button class="pin" data-pin="${i}" style="left:${p[0]}%;top:${p[1]}%" onclick="toggleGym(${i})">
+        ${PINS.map(p=>`
+          <button class="pin" style="left:${p[0]}%;top:${p[1]}%" onclick="toast('Map picker isn’t wired up yet — pick from the list')">
             <span class="mk"><i></i></span><span class="lab">${p[2]}</span>
           </button>`).join('')}
         <div class="map-badge">You are here</div>
       </div>
       <div class="obm-foot">
-        <div class="cnt" id="mapCount">Tap pins to add gyms</div>
+        <div class="cnt">Map preview — select gyms from the list</div>
         <button class="btn btn-primary" style="width:auto;padding:0 24px;height:48px" onclick="closeGymMap()">Done</button>
       </div>
     </div>
@@ -1311,52 +1454,39 @@ function go(id){
 }
 function onScrollHead(el){ const h=el.parentElement.querySelector('.scr-head'); if(h) h.classList.toggle('stuck', el.scrollTop>4); }
 let multiMode=false;
-let selectedGyms=new Set();
+let selectedGyms=new Set();     // holds gym ids (stable across nearby ↔ search list swaps)
 function wireGym(){ syncGymUI(); } /* re-apply persisted selection to freshly rendered onboarding */
-function toggleGym(i){
-  if(selectedGyms.has(i)) selectedGyms.delete(i);        // tap again to deselect (both modes)
-  else { if(!multiMode) selectedGyms.clear(); selectedGyms.add(i); }
+function toggleGym(id){
+  if(selectedGyms.has(id)) selectedGyms.delete(id);      // tap again to deselect (both modes)
+  else { if(!multiMode) selectedGyms.clear(); selectedGyms.add(id); }
   syncGymUI();
 }
 function toggleMulti(){
   multiMode=!multiMode;
-  if(!multiMode && selectedGyms.size>1) selectedGyms=new Set([Math.min(...selectedGyms)]); // collapse to one
+  if(!multiMode && selectedGyms.size>1) selectedGyms=new Set([[...selectedGyms][0]]); // collapse to first-selected
   syncGymUI();
 }
 function syncGymUI(){
   if(!document.getElementById('obList')) return;
   const sw=document.getElementById('multiSw'); if(sw) sw.classList.toggle('on',multiMode);
   document.getElementById('obList').classList.toggle('multi',multiMode);
-  document.querySelectorAll('#obList .gymrow').forEach(r=>r.classList.toggle('sel',selectedGyms.has(+r.dataset.i)));
-  document.querySelectorAll('#obMap .pin').forEach(p=>p.classList.toggle('on',selectedGyms.has(+p.dataset.pin)));
+  document.querySelectorAll('#obList .gymrow').forEach(r=>r.classList.toggle('sel',selectedGyms.has(r.dataset.id)));
   const n=selectedGyms.size, cta=document.getElementById('obCta');
+  if(!cta) return;
   if(n===0){ cta.disabled=true; cta.textContent='Select a gym to continue'; }
   else { cta.disabled=false; cta.innerHTML=CHECK14+(n===1?'This is my gym':`Save ${n} gyms`); }
-  const mc=document.getElementById('mapCount');
-  if(mc) mc.innerHTML = n ? `<b>${n}</b> gym${n>1?'s':''} selected` : 'Tap pins to add gyms';
 }
-function openGymMap(){ document.getElementById('obMap').classList.add('open'); syncGymUI(); setDevBadge(); }
+function openGymMap(){ document.getElementById('obMap').classList.add('open'); setDevBadge(); }
 function closeGymMap(){ document.getElementById('obMap').classList.remove('open'); setDevBadge(); }
 function confirmGym(){
   if(!selectedGyms.size) return;
-  // GUESS: multi-select is allowed, so "home gym" = the first-selected gym (lowest index).
-  onbData.homeGym = GYMS[[...selectedGyms].sort((a,b)=>a-b)[0]].n;
+  // multi-select allowed → "home gym" = the first-selected gym; resolve its name from the id map.
+  const first=[...selectedGyms][0], g=onbGymsById.get(first);
+  onbData.homeGym = g ? g.name : 'your gym';
   onbStep=3; onbRender();
 }
-function onbHomeGym(){ return onbData.homeGym || 'Equinox Bowery'; }
-function filterGyms(q){
-  q=q.trim().toLowerCase();
-  document.getElementById('searchbar').classList.toggle('has-val', q.length>0);
-  let n=0;
-  document.querySelectorAll('#obList .gymrow').forEach(r=>{
-    const hit=r.dataset.find.includes(q);
-    r.classList.toggle('hidden', !hit); if(hit) n++;
-  });
-  document.getElementById('gcount').textContent = q ? `${n} match${n===1?'':'es'}` : gcountDefault();
-  document.getElementById('gymEmpty').style.display = n===0 ? 'block' : 'none';
-  document.getElementById('qEcho').textContent = q;
-}
-function clearGymSearch(){ const i=document.getElementById('gymSearch'); i.value=''; filterGyms(''); i.focus(); }
+function onbHomeGym(){ return onbData.homeGym || 'your gym'; }
+function clearGymSearch(){ const i=document.getElementById('gymSearch'); i.value=''; onSearchInput(''); i.focus(); }
 function onObScroll(el){ document.getElementById('obHead').classList.toggle('scrolled', el.scrollTop>4); }
 function react(btn){
   const c=btn.querySelector('.rc');const on=btn.classList.toggle('reacted');
