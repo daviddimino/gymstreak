@@ -620,21 +620,41 @@ const obEsc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
    The dev switch on step 1 sets window.__LOCATION_MODE to force any outcome
    without moving. NOTE: the "Always" upgrade belongs AFTER the first check-in,
    never during onboarding. */
-function requestLocation(){
+let onbLastGeoErr=null;                           // last geolocation failure — for the console + a targeted hint
+const getPosition=opts=>new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,opts));
+async function requestLocation(){
   const sim=window.__LOCATION_MODE;              // dev override; unset = use the real device
   if(sim){
     const coords = sim==='granted' ? {lat:40.7264,lng:-73.9915} : null;  // East Village, NYC
     const state = sim==='timeout' ? 'locfail' : sim;
     return new Promise(res=>setTimeout(()=>res({state,coords}),450));
   }
-  if(!('geolocation' in navigator)) return Promise.resolve({state:'unavailable',coords:null});
-  return new Promise(res=>{
-    navigator.geolocation.getCurrentPosition(
-      p=>res({state:'granted',coords:{lat:p.coords.latitude,lng:p.coords.longitude}}),
-      err=>res({state: err.code===1 ? 'denied' : 'locfail', coords:null}),  // 1 = PERMISSION_DENIED; 2/3 = no fix
-      {enableHighAccuracy:false,timeout:8000,maximumAge:60000}
-    );
-  });
+  if(!('geolocation' in navigator)) return {state:'unavailable',coords:null};
+  onbLastGeoErr=null;
+  // Two passes: a quick cached/network fix, then a forced fresh high-accuracy read.
+  // Desktops often fail the first with POSITION_UNAVAILABLE but succeed on the retry.
+  const attempts=[
+    {enableHighAccuracy:false, timeout:10000, maximumAge:60000},
+    {enableHighAccuracy:true,  timeout:15000, maximumAge:0},
+  ];
+  for(const opts of attempts){
+    try{
+      const p=await getPosition(opts);
+      return {state:'granted', coords:{lat:p.coords.latitude, lng:p.coords.longitude}};
+    }catch(err){
+      onbLastGeoErr=err;
+      if(err.code===1){ console.warn('[GymStreak] location denied by user'); return {state:'denied',coords:null}; } // 1 = PERMISSION_DENIED
+    }
+  }
+  console.warn('[GymStreak] location fix failed — code', onbLastGeoErr?.code, '·', onbLastGeoErr?.message); // 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
+  return {state:'locfail', coords:null};
+}
+// A targeted hint for the locfail screen, based on why the fix failed.
+function geoHint(){
+  const c=onbLastGeoErr?.code;
+  if(c===3) return 'It timed out getting a fix — try again, ideally near Wi-Fi or with GPS on.';
+  if(c===2) return 'Your device couldn’t determine a position. On a Mac, check System Settings → Privacy &amp; Security → Location Services is on for your browser.';
+  return 'We had permission but couldn’t get a fix.';
 }
 function setLocMode(m){ window.__LOCATION_MODE=m; onbRender(); }
 async function onbEnableLocation(btn){
@@ -757,7 +777,7 @@ function renderGymList(){
       <p>Location is off, so we can’t sort by distance. Type your gym’s name in the search box above.</p></div>`;
   } else if(st==='locfail'){
     body=`<div class="gym-state"><b>Couldn’t pin your location</b>
-      <p>We had permission but couldn’t get a fix. Retry, or search for your gym by name above.</p>
+      <p>${geoHint()} Retry, or search for your gym by name above.</p>
       <button class="gym-retry" onclick="retryLocation()">${I.pin}Retry location</button></div>`;
   }
   const showManual = ['loaded','empty','denied','locfail'].includes(st);
